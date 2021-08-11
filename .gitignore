@@ -9,9 +9,19 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Mm]emoryCaptures/
+# エディタ拡張ではいらない
+/Packages/
+/ProjectSettings/
+/Assets/*
+!/Assets/coke12103/
+/Assets/coke12103/*
+!/Assets/coke12103.meta
+!/Assets/coke12103/*.meta
+!/Assets/coke12103/SimpleLight/
+/Assets/coke12103/SimpleLight/User/
+/Assets/coke12103/SimpleLight/User.meta
 
-# Asset meta data should only be ignored when the corresponding asset is also ignored
-!/[Aa]ssets/**/*.meta
+
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
@@ -58,6 +68,3 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
-# エディタ拡張ではいらない
-/Packages/
-/ProjectSettings/
