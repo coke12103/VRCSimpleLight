@@ -58,3 +58,6 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+# エディタ拡張ではいらない
+/Packages/
+/ProjectSettings/
