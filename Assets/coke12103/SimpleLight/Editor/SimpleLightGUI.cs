@@ -203,6 +203,7 @@ public class SimpleLightGUI : EditorWindow
     SetupDirs();
     SetupDescriptor();
     RemoveOldParams();
+    RemoveOldLeyers();
     //CreateAnimatorParams();
   }
 
@@ -293,5 +294,27 @@ public class SimpleLightGUI : EditorWindow
     fx_layer.parameters = removed_params;
   }
 
-  
+  void RemoveOldLeyers(){
+    AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
+
+    AnimatorControllerLayer[] orig_layers = fx_layer.layers;
+    AnimatorControllerLayer[] removed_layers = new AnimatorControllerLayer[orig_layers.Length];
+
+    int count = 0;
+
+    for(int i = 0; i < orig_layers.Length; i++){
+      AnimatorControllerLayer layer = orig_layers[i];
+
+      if(!layer.name.StartsWith(prefix)){
+        removed_layers[i] = layer;
+        count++;
+      }else{
+        Debug.Log("Removed: " + layer.name);
+      }
+    }
+
+    System.Array.Resize(ref removed_layers, count);
+
+    fx_layer.layers = removed_layers;
+  }
 }
