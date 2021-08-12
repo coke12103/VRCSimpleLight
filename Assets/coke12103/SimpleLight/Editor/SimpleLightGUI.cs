@@ -272,7 +272,25 @@ public class SimpleLightGUI : EditorWindow
   void RemoveOldParams(){
     AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
 
-    Debug.Log(fx_layer);
+    AnimatorControllerParameter[] orig_params = fx_layer.parameters;
+    AnimatorControllerParameter[] removed_params = new AnimatorControllerParameter[orig_params.Length];
+
+    int count = 0;
+
+    for(int i = 0; i < orig_params.Length; i++){
+      AnimatorControllerParameter param = orig_params[i];
+
+      if(!param.name.StartsWith(prefix)){
+        removed_params[i] = param;
+        count++;
+      }else{
+        Debug.Log("Removed: " + param.name);
+      }
+    }
+
+    System.Array.Resize(ref removed_params, count);
+
+    fx_layer.parameters = removed_params;
   }
 
   
