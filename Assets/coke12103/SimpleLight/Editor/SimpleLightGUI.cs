@@ -13,8 +13,8 @@ public class SimpleLightGUI : EditorWindow
 {
   // 設定用情報
   private AvatarDescriptor target_avatar;
-  private Light target_light1;
-  private Light target_light2;
+  private Light target_light_spot;
+  private Light target_light_point;
   // 調整値の種類
   private static readonly string[] LightTypes = { "Spot", "Point", "Spot and Point" };
   private static readonly string[] ColorTypes = { "RGB(Radial Puppet)", "Template(8 colors)", "Single color" };
@@ -75,11 +75,14 @@ public class SimpleLightGUI : EditorWindow
     EditorGUI.BeginDisabledGroup(target_avatar == null);
       light_mode = EditorGUILayout.Popup("Light type", light_mode, LightTypes);
 
-      target_light1 = EditorGUILayout.ObjectField("Light 1", target_light1, typeof(Light), true) as Light;
+      // spot
+      if(light_mode == 0 || light_mode == 2){
+        target_light_spot = EditorGUILayout.ObjectField("Light(Spot)", target_light_spot, typeof(Light), true) as Light;
+      }
 
-      // ライトが1つで足りるモードであれば無効化
-      if(light_mode == 2){
-        target_light2 = EditorGUILayout.ObjectField("Light 2", target_light2, typeof(Light), true) as Light;
+      // point
+      if(light_mode == 1 || light_mode == 2){
+        target_light_point = EditorGUILayout.ObjectField("Light(Point)", target_light_point, typeof(Light), true) as Light;
       }
 
       // color
@@ -164,10 +167,12 @@ public class SimpleLightGUI : EditorWindow
   }
 
   bool CheckCondition(){
-    if(target_avatar == null || target_light1 == null) return false;
+    if(target_avatar == null) return false;
 
-    // 必要なライトがなければダメ
-    if(light_mode == 2 && target_light2 == null) return false;
+    if(light_mode == 0 && target_light_spot == null) return false;
+    if(light_mode == 1 && target_light_point == null) return false;
+
+    if(light_mode == 2 && (target_light_point == null || target_light_spot == null)) return false;
 
     return true;
   }
