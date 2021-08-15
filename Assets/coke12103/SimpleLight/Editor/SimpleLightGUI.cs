@@ -204,7 +204,9 @@ public class SimpleLightGUI : EditorWindow
     SetupDescriptor();
     RemoveOldParams();
     RemoveOldLeyers();
-    //CreateAnimatorParams();
+    // remove ex param
+    // remove ex menu
+    CreateAnimatorParams();
   }
 
   void CheckInstallCondition(){
@@ -316,5 +318,41 @@ public class SimpleLightGUI : EditorWindow
     System.Array.Resize(ref removed_layers, count);
 
     fx_layer.layers = removed_layers;
+  }
+
+  void CreateAnimatorParams(){
+    AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
+
+    // bool on/off
+    fx_layer.AddParameter(prefix + "Enable", AnimatorControllerParameterType.Bool);
+
+    // bool spot/point
+    if(light_mode == 2) fx_layer.AddParameter(prefix + "Mode", AnimatorControllerParameterType.Bool);
+
+    if(color_mode == 0){
+      // float color(r, g, b)
+      fx_layer.AddParameter(prefix + "ColorR", AnimatorControllerParameterType.Float);
+      fx_layer.AddParameter(prefix + "ColorG", AnimatorControllerParameterType.Float);
+      fx_layer.AddParameter(prefix + "ColorB", AnimatorControllerParameterType.Float);
+    }else if(color_mode == 1){
+      // int color template
+      fx_layer.AddParameter(prefix + "Color", AnimatorControllerParameterType.Int);
+    }
+
+    // float strength / int strength
+    if(strength_mode == 0 || strength_mode == 1){
+      fx_layer.AddParameter(prefix + "Strength", strength_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+    }
+
+    // float range / int range
+    if(range_mode == 0 || range_mode == 1){
+      fx_layer.AddParameter(prefix + "Range", range_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+    }
+
+    // spotのみの設定値
+    // float angle / int angle
+    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
+      fx_layer.AddParameter(prefix + "Angle", angle_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+    }
   }
 }
