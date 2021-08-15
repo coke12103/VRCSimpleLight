@@ -7,6 +7,7 @@ using UnityEditor.Animations;
 using AvatarDescriptor = VRC.SDK3.Avatars.Components.VRCAvatarDescriptor;
 using ExpressionsMenu = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu;
 using ExpressionParameters = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters;
+using ExpressionParameter = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.Parameter;
 using RuntimeAnimatorController = UnityEngine.RuntimeAnimatorController;
 
 public class SimpleLightGUI : EditorWindow
@@ -209,7 +210,7 @@ public class SimpleLightGUI : EditorWindow
     SetupDescriptor();
     RemoveOldParams();
     RemoveOldLeyers();
-    // remove ex param
+    RemoveOldExParam();
     // remove ex menu
     CreateAnimatorParams();
   }
@@ -323,6 +324,26 @@ public class SimpleLightGUI : EditorWindow
     System.Array.Resize(ref removed_layers, count);
 
     fx_layer.layers = removed_layers;
+  }
+
+  void RemoveOldExParam(){
+    ExpressionParameters ex_param = target_avatar.expressionParameters;
+
+    ExpressionParameter[] orig_ex_params = ex_param.parameters;
+    ExpressionParameter[] removed_ex_params = new ExpressionParameter[orig_ex_params.Length];
+
+    for(int i = 0; i < orig_ex_params.Length; i++){
+      ExpressionParameter param = orig_ex_params[i];
+
+      // 空のパラメーター消せるけどなんとなく無視する
+      if(!param.name.StartsWith(prefix)){
+        removed_ex_params[i] = param;
+      }else{
+        Debug.Log("Removed: " + param.name);
+      }
+
+      ex_param.parameters = removed_ex_params;
+    }
   }
 
   void CreateAnimatorParams(){
