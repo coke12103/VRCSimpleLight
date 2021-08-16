@@ -428,5 +428,25 @@ public class SimpleLightGUI : EditorWindow
     if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
       fx_layer.AddLayer(prefix + "Angle");
     }
+
+    FixLayerWeight(fx_layer);
+  }
+
+  void FixLayerWeight(AnimatorController anim_con){
+    AnimatorControllerLayer[] orig_layers = anim_con.layers;
+    AnimatorControllerLayer[] fixed_layers = new AnimatorControllerLayer[orig_layers.Length];
+
+    for(int i = 0; i < orig_layers.Length; i++){
+      AnimatorControllerLayer layer = orig_layers[i];
+
+      if(layer.name.StartsWith(prefix)){
+        layer.defaultWeight = 1.0f;
+        Debug.Log("Weight fix: " + layer.name);
+      }
+
+      fixed_layers[i] = layer;
+    }
+
+    anim_con.layers = fixed_layers;
   }
 }
