@@ -6,6 +6,7 @@ using UnityEditor.Animations;
 
 using AvatarDescriptor = VRC.SDK3.Avatars.Components.VRCAvatarDescriptor;
 using ExpressionsMenu = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu;
+using ExpressionsControl = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionsMenu.Control;
 using ExpressionParameters = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters;
 using ExpressionParameter = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.Parameter;
 using RuntimeAnimatorController = UnityEngine.RuntimeAnimatorController;
@@ -211,7 +212,7 @@ public class SimpleLightGUI : EditorWindow
     RemoveOldParams();
     RemoveOldLeyers();
     RemoveOldExParam();
-    // remove ex menu
+    RemoveOldExMenu();
     CreateAnimatorParams();
   }
 
@@ -343,6 +344,21 @@ public class SimpleLightGUI : EditorWindow
       }
 
       ex_param.parameters = removed_ex_params;
+    }
+  }
+
+  void RemoveOldExMenu(){
+    ExpressionsMenu ex_menu = target_avatar.expressionsMenu;
+
+    int i = 0;
+    while(i < ex_menu.controls.Count){
+      if(ex_menu.controls[i].name.StartsWith(prefix)){
+        Debug.Log("Removed: " + ex_menu.controls[i].name);
+        ex_menu.controls.RemoveAt(i);
+        continue;
+      }else{
+        i++;
+      }
     }
   }
 
