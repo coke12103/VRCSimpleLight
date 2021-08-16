@@ -209,11 +209,14 @@ public class SimpleLightGUI : EditorWindow
 
     SetupDirs();
     SetupDescriptor();
+    // ここから削除処理
     RemoveOldParams();
     RemoveOldLeyers();
     RemoveOldExParam();
     RemoveOldExMenu();
+    // ここまで削除処理
     CreateAnimatorParams();
+    CreateAnimatorLayer();
   }
 
   void CheckInstallCondition(){
@@ -395,6 +398,35 @@ public class SimpleLightGUI : EditorWindow
     // float angle / int angle
     if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
       fx_layer.AddParameter(prefix + "Angle", angle_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+    }
+  }
+
+  void CreateAnimatorLayer(){
+    AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
+
+    fx_layer.AddLayer(prefix + "Enable");
+
+    if(light_mode == 2) fx_layer.AddLayer(prefix + "Mode");
+
+    if(color_mode == 0){
+      fx_layer.AddLayer(prefix + "ColorR");
+      fx_layer.AddLayer(prefix + "ColorG");
+      fx_layer.AddLayer(prefix + "ColorB");
+    }else if(color_mode == 1){
+      fx_layer.AddLayer(prefix + "Color");
+    }
+
+    if(strength_mode == 0 || strength_mode == 1){
+      fx_layer.AddLayer(prefix + "Strength");
+    }
+
+    if(range_mode == 0 || range_mode == 1){
+      fx_layer.AddLayer(prefix + "Range");
+    }
+
+    // spotのみの設定値
+    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
+      fx_layer.AddLayer(prefix + "Angle");
     }
   }
 }
