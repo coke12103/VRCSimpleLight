@@ -218,6 +218,7 @@ public class SimpleLightGUI : EditorWindow
     // ここから追加処理
     CreateAnimatorParams();
     CreateAnimatorLayer();
+    FixLightsSetting();
     CreateAndBuildAnimation();
   }
 
@@ -408,8 +409,6 @@ public class SimpleLightGUI : EditorWindow
 
     fx_layer.AddLayer(prefix + "Enable");
 
-    if(light_mode == 2) fx_layer.AddLayer(prefix + "Mode");
-
     if(color_mode == 0){
       fx_layer.AddLayer(prefix + "ColorR");
       fx_layer.AddLayer(prefix + "ColorG");
@@ -450,6 +449,20 @@ public class SimpleLightGUI : EditorWindow
     }
 
     anim_con.layers = fixed_layers;
+  }
+
+  void FixLightsSetting(){
+    if(target_light_spot != null){
+      target_light_spot.type = LightType.Spot;
+      target_light_spot.lightmapBakeType = LightmapBakeType.Realtime;
+      target_light_spot.renderMode = LightRenderMode.ForcePixel;
+    }
+
+    if(target_light_point != null){
+      target_light_point.type = LightType.Point;
+      target_light_point.lightmapBakeType = LightmapBakeType.Realtime;
+      target_light_point.renderMode = LightRenderMode.ForcePixel;
+    }
   }
 
   void CreateAndBuildAnimation(){
