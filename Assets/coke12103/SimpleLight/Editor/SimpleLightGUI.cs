@@ -215,8 +215,10 @@ public class SimpleLightGUI : EditorWindow
     RemoveOldExParam();
     RemoveOldExMenu();
     // ここまで削除処理
+    // ここから追加処理
     CreateAnimatorParams();
     CreateAnimatorLayer();
+    CreateAndBuildAnimation();
   }
 
   void CheckInstallCondition(){
@@ -448,5 +450,21 @@ public class SimpleLightGUI : EditorWindow
     }
 
     anim_con.layers = fixed_layers;
+  }
+
+  void CreateAndBuildAnimation(){
+    //AnimationClip test_anim = new AnimationClip();
+    //AnimationCurve test_curve = new AnimationCurve();
+
+    //float key_val = 1f;
+    //string path = AnimationUtility.CalculateTransformPath(target_light_spot.gameObject.transform, target_avatar.gameObject.transform);
+
+    //test_curve.AddKey(0, key_val);
+
+    //test_anim.SetCurve(path, typeof(Transform), "transfrom.x", test_curve);
+
+    //AssetDatabase.CreateAsset(test_anim, user_asset_path + "/test.anim");
+    //AssetDatabase.SaveAssets();
+    //AssetDatabase.Refresh();
   }
 }
