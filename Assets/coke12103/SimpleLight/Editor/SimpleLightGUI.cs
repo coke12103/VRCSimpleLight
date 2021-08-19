@@ -466,18 +466,88 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void CreateAndBuildAnimation(){
-    //AnimationClip test_anim = new AnimationClip();
-    //AnimationCurve test_curve = new AnimationCurve();
+    AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
 
-    //float key_val = 1f;
-    //string path = AnimationUtility.CalculateTransformPath(target_light_spot.gameObject.transform, target_avatar.gameObject.transform);
+    AnimationClip off_anim = new AnimationClip();
 
-    //test_curve.AddKey(0, key_val);
+    // 単体か
+    if(light_mode == 2){
+      AddCurve(off_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 0);
+      AddCurve(off_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 0);
+    }else{
+      Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
 
-    //test_anim.SetCurve(path, typeof(Transform), "transfrom.x", test_curve);
+      AddCurve(off_anim, target, typeof(GameObject), "isActive", 0);
+    }
 
-    //AssetDatabase.CreateAsset(test_anim, user_asset_path + "/test.anim");
-    //AssetDatabase.SaveAssets();
-    //AssetDatabase.Refresh();
+    AnimatorStateMachine enable_state_m = fx_layer.layers[GetLayerIndex(fx_layer, prefix + "Enable")].stateMachine;
+
+    Debug.Log(enable_state_m);
+    // // bool on/off
+    // fx_layer.AddParameter(prefix + "Enable", AnimatorControllerParameterType.Bool);
+
+//    AnimationClip test_anim = new AnimationClip();
+//    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "x", 1f);
+//    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "y", 1f);
+//    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "z", 1f);
+
+    AssetDatabase.CreateAsset(off_anim, user_asset_path + "/test.anim");
+    AssetDatabase.SaveAssets();
+    AssetDatabase.Refresh();
+
+//    // bool spot/point
+//    if(light_mode == 2) fx_layer.AddParameter(prefix + "Mode", AnimatorControllerParameterType.Bool);
+//
+//    if(color_mode == 0){
+//      // float color(r, g, b)
+//      fx_layer.AddParameter(prefix + "ColorR", AnimatorControllerParameterType.Float);
+//      fx_layer.AddParameter(prefix + "ColorG", AnimatorControllerParameterType.Float);
+//      fx_layer.AddParameter(prefix + "ColorB", AnimatorControllerParameterType.Float);
+//    }else if(color_mode == 1){
+//      // int color template
+//      fx_layer.AddParameter(prefix + "Color", AnimatorControllerParameterType.Int);
+//    }
+//
+//    // float strength / int strength
+//    if(strength_mode == 0 || strength_mode == 1){
+//      fx_layer.AddParameter(prefix + "Strength", strength_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+//    }
+//
+//    // float range / int range
+//    if(range_mode == 0 || range_mode == 1){
+//      fx_layer.AddParameter(prefix + "Range", range_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+//    }
+//
+//    // spotのみの設定値
+//    // float angle / int angle
+//    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
+//      fx_layer.AddParameter(prefix + "Angle", angle_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+//    }
+  }
+
+  void AddCurve(AnimationClip clip, Transform target, System.Type target_type, string key, float value){
+    AnimationCurve curve = new AnimationCurve();
+
+    // 親はavatarで固定
+    string path = AnimationUtility.CalculateTransformPath(target, target_avatar.gameObject.transform);
+
+    curve.AddKey(0, value);
+
+    clip.SetCurve(path, target_type, key, curve);
+  }
+
+  // ない場合は想定しない(実装的にない場合は例外なので)
+  int GetLayerIndex(AnimatorController anim, string name){
+    AnimatorControllerLayer[] layers = anim.layers;
+
+    for(int i = 0; i < layers.Length; i++){
+      AnimatorControllerLayer layer = layers[i];
+
+      if(layer.name == name){
+        return i;
+      }
+    }
+
+    throw new System.Exception("そんなやつない");
   }
 }
