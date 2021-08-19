@@ -480,9 +480,14 @@ public class SimpleLightGUI : EditorWindow
       AddCurve(off_anim, target, typeof(GameObject), "isActive", 0);
     }
 
-    AnimatorStateMachine enable_state_m = fx_layer.layers[GetLayerIndex(fx_layer, prefix + "Enable")].stateMachine;
+    AssetDatabase.CreateAsset(off_anim, user_asset_path + "/off.anim");
 
-    Debug.Log(enable_state_m);
+    AnimatorState state = AddStateClip(fx_layer, prefix + "Enable", off_anim);
+
+    AnimatorStateMachine state_machine = fx_layer.layers[GetLayerIndex(fx_layer, prefix + "Enable")].stateMachine;
+
+    AnimatorStateTransition transition = state_machine.AddAnyStateTransition(state);
+
     // // bool on/off
     // fx_layer.AddParameter(prefix + "Enable", AnimatorControllerParameterType.Bool);
 
@@ -491,7 +496,6 @@ public class SimpleLightGUI : EditorWindow
 //    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "y", 1f);
 //    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "z", 1f);
 
-    AssetDatabase.CreateAsset(off_anim, user_asset_path + "/test.anim");
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
 
@@ -534,6 +538,18 @@ public class SimpleLightGUI : EditorWindow
     curve.AddKey(0, value);
 
     clip.SetCurve(path, target_type, key, curve);
+  }
+
+  AnimatorState AddStateClip(AnimatorController anim, string layer_name, AnimationClip clip){
+    AnimatorControllerLayer[] layers = anim.layers;
+
+    AnimatorStateMachine state_machine = layers[GetLayerIndex(anim, layer_name)].stateMachine;
+
+    AnimatorState state = state_machine.AddState(clip.name);
+
+    state.motion = clip;
+
+    return state;
   }
 
   // ない場合は想定しない(実装的にない場合は例外なので)
