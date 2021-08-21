@@ -472,8 +472,8 @@ public class SimpleLightGUI : EditorWindow
 
     // 単体か
     if(light_mode == 2){
-      AddCurve(off_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 0);
       AddCurve(off_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 0);
+      AddCurve(off_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 0);
     }else{
       Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
 
@@ -487,13 +487,40 @@ public class SimpleLightGUI : EditorWindow
 
     off_transition.AddCondition(AnimatorConditionMode.IfNot, 0, prefix + "Enable");
 
+    if(light_mode == 2){
+      AnimationClip on_spot_anim = new AnimationClip();
+      AnimationClip on_point_anim = new AnimationClip();
+
+      // spot
+      AddCurve(on_spot_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 1);
+      AddCurve(on_spot_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 0);
+
+      // point
+      AddCurve(on_point_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 0);
+      AddCurve(on_point_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 1);
+
+      AssetDatabase.CreateAsset(on_spot_anim, user_asset_path + "/on_spot.anim");
+      AssetDatabase.CreateAsset(on_point_anim, user_asset_path + "/on_point.anim");
+
+      AnimatorState on_spot_state = AddStateClip(fx_layer, prefix + "Enable", on_spot_anim);
+      AnimatorState on_point_state = AddStateClip(fx_layer, prefix + "Enable", on_point_anim);
+
+      AnimatorStateTransition on_spot_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", on_spot_state);
+      AnimatorStateTransition on_point_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", on_point_state);
+
+      on_spot_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Enable");
+      on_spot_transition.AddCondition(AnimatorConditionMode.IfNot, 0, prefix + "Mode");
+
+      on_point_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Enable");
+      on_point_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Mode");
+    }else{
+      Debug.Log(null);
+    }
+
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
 
-//    // bool spot/point
-//    if(light_mode == 2) fx_layer.AddParameter(prefix + "Mode", AnimatorControllerParameterType.Bool);
-//
 //    if(color_mode == 0){
 //      // float color(r, g, b)
 //      fx_layer.AddParameter(prefix + "ColorR", AnimatorControllerParameterType.Float);
