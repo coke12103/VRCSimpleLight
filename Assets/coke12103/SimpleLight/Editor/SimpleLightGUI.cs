@@ -482,20 +482,12 @@ public class SimpleLightGUI : EditorWindow
 
     AssetDatabase.CreateAsset(off_anim, user_asset_path + "/off.anim");
 
-    AnimatorState state = AddStateClip(fx_layer, prefix + "Enable", off_anim);
+    AnimatorState off_state = AddStateClip(fx_layer, prefix + "Enable", off_anim);
+    AnimatorStateTransition off_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", off_state);
 
-    AnimatorStateMachine state_machine = fx_layer.layers[GetLayerIndex(fx_layer, prefix + "Enable")].stateMachine;
+    off_transition.AddCondition(AnimatorConditionMode.IfNot, 0, prefix + "Enable");
 
-    AnimatorStateTransition transition = state_machine.AddAnyStateTransition(state);
-
-    // // bool on/off
-    // fx_layer.AddParameter(prefix + "Enable", AnimatorControllerParameterType.Bool);
-
-//    AnimationClip test_anim = new AnimationClip();
-//    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "x", 1f);
-//    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "y", 1f);
-//    AddCurve(test_anim, target_light_spot.gameObject.transform, typeof(Transform), "z", 1f);
-
+    // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
 
@@ -549,7 +541,25 @@ public class SimpleLightGUI : EditorWindow
 
     state.motion = clip;
 
+    // NOTE: UnityのドキュメントにはLayersはコピーだから変更したら戻せよって書いてあるんだけど何故か上書きしなくても反映されてしかもディスクへの書き出しまでされる。怖いから一応やる。
+    anim.layers = layers;
+
     return state;
+  }
+
+  AnimatorStateTransition CreateAnyStateTransition(AnimatorController anim, string layer_name, AnimatorState state){
+    AnimatorControllerLayer[] layers = anim.layers;
+
+    AnimatorStateMachine machine = layers[GetLayerIndex(anim, layer_name)].stateMachine;
+
+    AnimatorStateTransition transition = machine.AddAnyStateTransition(state);
+
+    transition.duration = 0;
+    transition.hasExitTime = false;
+
+    anim.layers = layers;
+
+    return transition;
   }
 
   // ない場合は想定しない(実装的にない場合は例外なので)
