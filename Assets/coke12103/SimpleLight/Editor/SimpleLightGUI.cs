@@ -514,7 +514,19 @@ public class SimpleLightGUI : EditorWindow
       on_point_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Enable");
       on_point_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Mode");
     }else{
-      Debug.Log(null);
+      AnimationClip on_anim = new AnimationClip();
+
+      Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
+
+      AddCurve(on_anim, target, typeof(GameObject), "isActive", 1);
+
+      AssetDatabase.CreateAsset(on_anim, user_asset_path + "/on.anim");
+
+      AnimatorState on_state = AddStateClip(fx_layer, prefix + "Enable", on_anim);
+
+      AnimatorStateTransition on_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", on_state);
+
+      on_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Enable");
     }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
