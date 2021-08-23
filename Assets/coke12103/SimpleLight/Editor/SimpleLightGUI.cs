@@ -472,12 +472,12 @@ public class SimpleLightGUI : EditorWindow
 
     // 単体か
     if(light_mode == 2){
-      AddCurve(off_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 0);
-      AddCurve(off_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 0);
+      AddCurve(off_anim, target_light_spot.gameObject.transform, typeof(GameObject), "m_IsActive", 0);
+      AddCurve(off_anim, target_light_point.gameObject.transform, typeof(GameObject), "m_IsActive", 0);
     }else{
       Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
 
-      AddCurve(off_anim, target, typeof(GameObject), "isActive", 0);
+      AddCurve(off_anim, target, typeof(GameObject), "m_IsActive", 0);
     }
 
     AssetDatabase.CreateAsset(off_anim, user_asset_path + "/off.anim");
@@ -492,12 +492,12 @@ public class SimpleLightGUI : EditorWindow
       AnimationClip on_point_anim = new AnimationClip();
 
       // spot
-      AddCurve(on_spot_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 1);
-      AddCurve(on_spot_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 0);
+      AddCurve(on_spot_anim, target_light_spot.gameObject.transform, typeof(GameObject), "m_IsActive", 1);
+      AddCurve(on_spot_anim, target_light_point.gameObject.transform, typeof(GameObject), "m_IsActive", 0);
 
       // point
-      AddCurve(on_point_anim, target_light_spot.gameObject.transform, typeof(GameObject), "isActive", 0);
-      AddCurve(on_point_anim, target_light_point.gameObject.transform, typeof(GameObject), "isActive", 1);
+      AddCurve(on_point_anim, target_light_spot.gameObject.transform, typeof(GameObject), "m_IsActive", 0);
+      AddCurve(on_point_anim, target_light_point.gameObject.transform, typeof(GameObject), "m_IsActive", 1);
 
       AssetDatabase.CreateAsset(on_spot_anim, user_asset_path + "/on_spot.anim");
       AssetDatabase.CreateAsset(on_point_anim, user_asset_path + "/on_point.anim");
@@ -518,7 +518,7 @@ public class SimpleLightGUI : EditorWindow
 
       Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
 
-      AddCurve(on_anim, target, typeof(GameObject), "isActive", 1);
+      AddCurve(on_anim, target, typeof(GameObject), "m_IsActive", 1);
 
       AssetDatabase.CreateAsset(on_anim, user_asset_path + "/on.anim");
 
@@ -528,6 +528,31 @@ public class SimpleLightGUI : EditorWindow
 
       on_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Enable");
     }
+
+    BlendTree tree = new BlendTree();
+
+    tree.blendType = BlendTreeType.Simple1D;
+    tree.blendParameter = prefix + "ColorR";
+
+    AnimationClip zero_anim = new AnimationClip();
+    AnimationClip hyaku_anim = new AnimationClip();
+
+    Transform _target = target_light_spot.gameObject.transform;
+
+    AddCurve(zero_anim, _target, typeof(Light), "m_Color.r", 0);
+    AddCurve(hyaku_anim, _target, typeof(Light), "m_Color.r", 1);
+
+    AssetDatabase.CreateAsset(zero_anim, user_asset_path + "/zero.anim");
+    AssetDatabase.CreateAsset(hyaku_anim, user_asset_path + "/hyaku.anim");
+
+    tree.AddChild(zero_anim, 0);
+    tree.AddChild(hyaku_anim, 1);
+
+    AnimatorStateMachine state_machine = fx_layer.layers[GetLayerIndex(fx_layer, prefix + "ColorR")].stateMachine;
+
+    AnimatorState state = state_machine.AddState("test");
+
+    state.motion = tree;
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
