@@ -595,6 +595,41 @@ public class SimpleLightGUI : EditorWindow
       CreateState(fx_layer, prefix + "ColorR", color_r_tree);
       CreateState(fx_layer, prefix + "ColorG", color_g_tree);
       CreateState(fx_layer, prefix + "ColorB", color_b_tree);
+    }else if(color_mode == 1){
+      AnimationClip[] template_color_anims = new AnimationClip[template_colors.Length];
+      
+      for(int i = 0; i < template_color_anims.Length; i++){
+        template_color_anims[i] = new AnimationClip();
+
+        float r = template_colors[i].r;
+        float g = template_colors[i].g;
+        float b = template_colors[i].b;
+
+        string color_name = ColorUtility.ToHtmlStringRGB(template_colors[i]);
+
+        if(light_mode == 2){
+          Debug.Log(template_color_anims[i]);
+          AddCurve(template_color_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Color.r", r);
+          AddCurve(template_color_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Color.g", g);
+          AddCurve(template_color_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Color.b", b);
+
+          AddCurve(template_color_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Color.r", r);
+          AddCurve(template_color_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Color.g", g);
+          AddCurve(template_color_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Color.b", b);
+        }else{
+          Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
+
+          AddCurve(template_color_anims[i], target, typeof(Light), "m_Color.r", r);
+          AddCurve(template_color_anims[i], target, typeof(Light), "m_Color.g", g);
+          AddCurve(template_color_anims[i], target, typeof(Light), "m_Color.b", b);
+        }
+
+        AssetDatabase.CreateAsset(template_color_anims[i], user_asset_path + "/color_" + color_name + ".anim");
+
+        AnimatorState state = CreateState(fx_layer, prefix + "Color", template_color_anims[i]);
+        AnimatorStateTransition transition = CreateAnyStateTransition(fx_layer, prefix + "Color", state);
+        transition.AddCondition(AnimatorConditionMode.Equals, i, prefix + "Color");
+      }
     }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
