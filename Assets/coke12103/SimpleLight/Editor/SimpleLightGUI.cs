@@ -482,7 +482,7 @@ public class SimpleLightGUI : EditorWindow
 
     AssetDatabase.CreateAsset(off_anim, user_asset_path + "/off.anim");
 
-    AnimatorState off_state = AddStateClip(fx_layer, prefix + "Enable", off_anim);
+    AnimatorState off_state = CreateState(fx_layer, prefix + "Enable", off_anim);
     AnimatorStateTransition off_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", off_state);
 
     off_transition.AddCondition(AnimatorConditionMode.IfNot, 0, prefix + "Enable");
@@ -502,8 +502,8 @@ public class SimpleLightGUI : EditorWindow
       AssetDatabase.CreateAsset(on_spot_anim, user_asset_path + "/on_spot.anim");
       AssetDatabase.CreateAsset(on_point_anim, user_asset_path + "/on_point.anim");
 
-      AnimatorState on_spot_state = AddStateClip(fx_layer, prefix + "Enable", on_spot_anim);
-      AnimatorState on_point_state = AddStateClip(fx_layer, prefix + "Enable", on_point_anim);
+      AnimatorState on_spot_state = CreateState(fx_layer, prefix + "Enable", on_spot_anim);
+      AnimatorState on_point_state = CreateState(fx_layer, prefix + "Enable", on_point_anim);
 
       AnimatorStateTransition on_spot_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", on_spot_state);
       AnimatorStateTransition on_point_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", on_point_state);
@@ -522,7 +522,7 @@ public class SimpleLightGUI : EditorWindow
 
       AssetDatabase.CreateAsset(on_anim, user_asset_path + "/on.anim");
 
-      AnimatorState on_state = AddStateClip(fx_layer, prefix + "Enable", on_anim);
+      AnimatorState on_state = CreateState(fx_layer, prefix + "Enable", on_anim);
 
       AnimatorStateTransition on_transition = CreateAnyStateTransition(fx_layer, prefix + "Enable", on_state);
 
@@ -592,9 +592,9 @@ public class SimpleLightGUI : EditorWindow
       color_g_tree.AddChild(color_g_one_anim, 1);
       color_b_tree.AddChild(color_b_one_anim, 1);
 
-      AddStateTree(fx_layer, prefix + "ColorR", color_r_tree);
-      AddStateTree(fx_layer, prefix + "ColorG", color_g_tree);
-      AddStateTree(fx_layer, prefix + "ColorB", color_b_tree);
+      CreateState(fx_layer, prefix + "ColorR", color_r_tree);
+      CreateState(fx_layer, prefix + "ColorG", color_g_tree);
+      CreateState(fx_layer, prefix + "ColorB", color_b_tree);
     }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
@@ -631,29 +631,14 @@ public class SimpleLightGUI : EditorWindow
     clip.SetCurve(path, target_type, key, curve);
   }
 
-  AnimatorState AddStateClip(AnimatorController anim, string layer_name, AnimationClip clip){
+  AnimatorState CreateState(AnimatorController anim, string layer_name, Motion motion){
     AnimatorControllerLayer[] layers = anim.layers;
 
     AnimatorStateMachine state_machine = layers[GetLayerIndex(anim, layer_name)].stateMachine;
 
-    AnimatorState state = state_machine.AddState(clip.name);
+    AnimatorState state = state_machine.AddState(motion.name);
 
-    state.motion = clip;
-
-    // NOTE: UnityのドキュメントにはLayersはコピーだから変更したら戻せよって書いてあるんだけど何故か上書きしなくても反映されてしかもディスクへの書き出しまでされる。怖いから一応やる。
-    anim.layers = layers;
-
-    return state;
-  }
-
-  AnimatorState AddStateTree(AnimatorController anim, string layer_name, BlendTree tree){
-    AnimatorControllerLayer[] layers = anim.layers;
-
-    AnimatorStateMachine state_machine = layers[GetLayerIndex(anim, layer_name)].stateMachine;
-
-    AnimatorState state = state_machine.AddState(tree.name);
-
-    state.motion = tree;
+    state.motion = motion;
 
     // NOTE: UnityのドキュメントにはLayersはコピーだから変更したら戻せよって書いてあるんだけど何故か上書きしなくても反映されてしかもディスクへの書き出しまでされる。怖いから一応やる。
     anim.layers = layers;
