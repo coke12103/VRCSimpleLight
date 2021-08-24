@@ -529,44 +529,79 @@ public class SimpleLightGUI : EditorWindow
       on_transition.AddCondition(AnimatorConditionMode.If, 0, prefix + "Enable");
     }
 
-    BlendTree tree = new BlendTree();
+    if(color_mode == 0){
+      BlendTree color_r_tree = CreateBlendTree("ColorR", prefix + "ColorR");
+      BlendTree color_g_tree = CreateBlendTree("ColorG", prefix + "ColorG");
+      BlendTree color_b_tree = CreateBlendTree("ColorB", prefix + "ColorB");
 
-    tree.blendType = BlendTreeType.Simple1D;
-    tree.blendParameter = prefix + "ColorR";
+      AnimationClip color_r_zero_anim = new AnimationClip();
+      AnimationClip color_g_zero_anim = new AnimationClip();
+      AnimationClip color_b_zero_anim = new AnimationClip();
 
-    AnimationClip zero_anim = new AnimationClip();
-    AnimationClip hyaku_anim = new AnimationClip();
+      AnimationClip color_r_one_anim = new AnimationClip();
+      AnimationClip color_g_one_anim = new AnimationClip();
+      AnimationClip color_b_one_anim = new AnimationClip();
 
-    Transform _target = target_light_spot.gameObject.transform;
+      if(light_mode == 2){
+        // R
+        AddCurve(color_r_zero_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.r", 0);
+        AddCurve(color_r_zero_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.r", 0);
 
-    AddCurve(zero_anim, _target, typeof(Light), "m_Color.r", 0);
-    AddCurve(hyaku_anim, _target, typeof(Light), "m_Color.r", 1);
+        AddCurve(color_r_one_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.r", 1);
+        AddCurve(color_r_one_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.r", 1);
 
-    AssetDatabase.CreateAsset(zero_anim, user_asset_path + "/zero.anim");
-    AssetDatabase.CreateAsset(hyaku_anim, user_asset_path + "/hyaku.anim");
+        // G
+        AddCurve(color_g_zero_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.g", 0);
+        AddCurve(color_g_zero_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.g", 0);
 
-    tree.AddChild(zero_anim, 0);
-    tree.AddChild(hyaku_anim, 1);
+        AddCurve(color_g_one_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.g", 1);
+        AddCurve(color_g_one_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.g", 1);
 
-    AnimatorStateMachine state_machine = fx_layer.layers[GetLayerIndex(fx_layer, prefix + "ColorR")].stateMachine;
+        // B
+        AddCurve(color_b_zero_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.b", 0);
+        AddCurve(color_b_zero_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.b", 0);
 
-    AnimatorState state = state_machine.AddState("test");
+        AddCurve(color_b_one_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.b", 1);
+        AddCurve(color_b_one_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.b", 1);
+      }else{
+        Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
 
-    state.motion = tree;
+        AddCurve(color_r_zero_anim, target, typeof(Light), "m_Color.r", 0);
+        AddCurve(color_r_one_anim, target, typeof(Light), "m_Color.r", 1);
+
+        AddCurve(color_g_zero_anim, target, typeof(Light), "m_Color.g", 0);
+        AddCurve(color_g_one_anim, target, typeof(Light), "m_Color.g", 1);
+
+        AddCurve(color_b_zero_anim, target, typeof(Light), "m_Color.b", 0);
+        AddCurve(color_b_one_anim, target, typeof(Light), "m_Color.b", 1);
+      }
+
+      AssetDatabase.CreateAsset(color_r_zero_anim, user_asset_path + "/color_r_zero.anim");
+      AssetDatabase.CreateAsset(color_g_zero_anim, user_asset_path + "/color_g_zero.anim");
+      AssetDatabase.CreateAsset(color_b_zero_anim, user_asset_path + "/color_b_zero.anim");
+
+      AssetDatabase.CreateAsset(color_r_one_anim, user_asset_path + "/color_r_one.anim");
+      AssetDatabase.CreateAsset(color_g_one_anim, user_asset_path + "/color_g_one.anim");
+      AssetDatabase.CreateAsset(color_b_one_anim, user_asset_path + "/color_b_one.anim");
+
+      color_r_tree.AddChild(color_r_zero_anim, 0);
+      color_g_tree.AddChild(color_g_zero_anim, 0);
+      color_b_tree.AddChild(color_b_zero_anim, 0);
+
+      color_r_tree.AddChild(color_r_one_anim, 1);
+      color_g_tree.AddChild(color_g_one_anim, 1);
+      color_b_tree.AddChild(color_b_one_anim, 1);
+
+      AddStateTree(fx_layer, prefix + "ColorR", color_r_tree);
+      AddStateTree(fx_layer, prefix + "ColorG", color_g_tree);
+      AddStateTree(fx_layer, prefix + "ColorB", color_b_tree);
+    }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
 
-//    if(color_mode == 0){
-//      // float color(r, g, b)
-//      fx_layer.AddParameter(prefix + "ColorR", AnimatorControllerParameterType.Float);
-//      fx_layer.AddParameter(prefix + "ColorG", AnimatorControllerParameterType.Float);
-//      fx_layer.AddParameter(prefix + "ColorB", AnimatorControllerParameterType.Float);
-//    }else if(color_mode == 1){
-//      // int color template
-//      fx_layer.AddParameter(prefix + "Color", AnimatorControllerParameterType.Int);
-//    }
+
 //
 //    // float strength / int strength
 //    if(strength_mode == 0 || strength_mode == 1){
@@ -611,6 +646,21 @@ public class SimpleLightGUI : EditorWindow
     return state;
   }
 
+  AnimatorState AddStateTree(AnimatorController anim, string layer_name, BlendTree tree){
+    AnimatorControllerLayer[] layers = anim.layers;
+
+    AnimatorStateMachine state_machine = layers[GetLayerIndex(anim, layer_name)].stateMachine;
+
+    AnimatorState state = state_machine.AddState(tree.name);
+
+    state.motion = tree;
+
+    // NOTE: UnityのドキュメントにはLayersはコピーだから変更したら戻せよって書いてあるんだけど何故か上書きしなくても反映されてしかもディスクへの書き出しまでされる。怖いから一応やる。
+    anim.layers = layers;
+
+    return state;
+  }
+
   AnimatorStateTransition CreateAnyStateTransition(AnimatorController anim, string layer_name, AnimatorState state){
     AnimatorControllerLayer[] layers = anim.layers;
 
@@ -624,6 +674,16 @@ public class SimpleLightGUI : EditorWindow
     anim.layers = layers;
 
     return transition;
+  }
+
+  BlendTree CreateBlendTree(string name, string param){
+    BlendTree tree = new BlendTree();
+
+    tree.name = name;
+    tree.blendType = BlendTreeType.Simple1D;
+    tree.blendParameter = param;
+
+    return tree;
   }
 
   // ない場合は想定しない(実装的にない場合は例外なので)
