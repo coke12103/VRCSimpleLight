@@ -20,7 +20,7 @@ public class SimpleLightGUI : EditorWindow
   // 調整値の種類
   private static readonly string[] LightTypes = { "Spot", "Point", "Spot and Point" };
   private static readonly string[] ColorTypes = { "RGB(Radial Puppet)", "Template(8 colors)", "Single color" };
-  private static readonly string[] StrengthTypes = { "Stepless(Radial Puppet)", "8 Stage", "Single strength" };
+  private static readonly string[] IntensityTypes = { "Stepless(Radial Puppet)", "8 Stage", "Single intensity" };
   private static readonly string[] RangeTypes = { "Stepless(Radial Puppet)", "8 Stage", "Single range" };
   private static readonly string[] AngleTypes = { "Stepless(Radial Puppet)", "8 Stage", "Single angle"};
 
@@ -37,7 +37,7 @@ public class SimpleLightGUI : EditorWindow
   // 調整値
   private int light_mode;
   private int color_mode;
-  private int strength_mode;
+  private int intensity_mode;
   private int range_mode;
   private int angle_mode;
 
@@ -49,9 +49,9 @@ public class SimpleLightGUI : EditorWindow
   private Color[] template_colors = {Color.white, Color.white, Color.white, Color.white, Color.white, Color.white, Color.white, Color.white};
   private Color single_color = Color.white;
 
-  // Strength
-  private float min_strength, max_strength, single_strength;
-  private float[] template_strengths = new float[8];
+  // Intensity
+  private float min_intensity, max_intensity, single_intensity;
+  private float[] template_intensities = new float[8];
 
   // Range
   private float min_range, max_range, single_range;
@@ -100,20 +100,20 @@ public class SimpleLightGUI : EditorWindow
         single_color = EditorGUILayout.ColorField("Color", single_color);
       }
 
-      // strength
-      strength_mode = EditorGUILayout.Popup("Strength type", strength_mode, StrengthTypes);
+      // intensity
+      intensity_mode = EditorGUILayout.Popup("Intensity type", intensity_mode, IntensityTypes);
 
-      if(strength_mode == 0){
-        min_strength = EditorGUILayout.FloatField("Min strength", min_strength);
-        max_strength = EditorGUILayout.FloatField("Max strength", max_strength);
-      }else if(strength_mode == 1){
-        EditorGUILayout.LabelField("Strength");
+      if(intensity_mode == 0){
+        min_intensity = EditorGUILayout.FloatField("Min intensity", min_intensity);
+        max_intensity = EditorGUILayout.FloatField("Max intensity", max_intensity);
+      }else if(intensity_mode == 1){
+        EditorGUILayout.LabelField("Intensity");
 
-        for(int i = 0; i < template_strengths.Length; i++){
-          template_strengths[i] = EditorGUILayout.FloatField("Strength " + (i + 1), template_strengths[i]);
+        for(int i = 0; i < template_intensities.Length; i++){
+          template_intensities[i] = EditorGUILayout.FloatField("Intensity " + (i + 1), template_intensities[i]);
         }
-      }else if(strength_mode == 2){
-        single_strength = EditorGUILayout.FloatField("Strength", single_strength);
+      }else if(intensity_mode == 2){
+        single_intensity = EditorGUILayout.FloatField("Intensity", single_intensity);
       }
 
       // range
@@ -191,8 +191,8 @@ public class SimpleLightGUI : EditorWindow
     // int color template 8bit
     else if(color_mode == 1) result += 8;
 
-    // float strength 8bit / int strength 8bit
-    if(strength_mode == 0 || strength_mode == 1) result += 8;
+    // float intensity 8bit / int intensity 8bit
+    if(intensity_mode == 0 || intensity_mode == 1) result += 8;
 
     // float range 8bit / int range 8bit
     if(range_mode == 0 || range_mode == 1) result += 8;
@@ -387,9 +387,9 @@ public class SimpleLightGUI : EditorWindow
       fx_layer.AddParameter(prefix + "Color", AnimatorControllerParameterType.Int);
     }
 
-    // float strength / int strength
-    if(strength_mode == 0 || strength_mode == 1){
-      fx_layer.AddParameter(prefix + "Strength", strength_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
+    // float intensity / int intensity
+    if(intensity_mode == 0 || intensity_mode == 1){
+      fx_layer.AddParameter(prefix + "Intensity", intensity_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
     }
 
     // float range / int range
@@ -417,8 +417,8 @@ public class SimpleLightGUI : EditorWindow
       fx_layer.AddLayer(prefix + "Color");
     }
 
-    if(strength_mode == 0 || strength_mode == 1){
-      fx_layer.AddLayer(prefix + "Strength");
+    if(intensity_mode == 0 || intensity_mode == 1){
+      fx_layer.AddLayer(prefix + "Intensity");
     }
 
     if(range_mode == 0 || range_mode == 1){
@@ -565,31 +565,31 @@ public class SimpleLightGUI : EditorWindow
       if(target_light_point != null) target_light_point.color = single_color;
     }
 
-    if(strength_mode == 0){
-      BlendTree strength_tree = CreateBlendTree("Strength", prefix + "Strength", _lights, typeof(Light), "m_Intensity", min_strength, max_strength);
+    if(intensity_mode == 0){
+      BlendTree intensity_tree = CreateBlendTree("Intensity", prefix + "Intensity", _lights, typeof(Light), "m_Intensity", min_intensity, max_intensity);
 
-      CreateState(fx_layer, prefix + "Strength", strength_tree);
-    }else if(strength_mode == 1){
-      AnimationClip[] template_strength_anims = new AnimationClip[template_strengths.Length];
+      CreateState(fx_layer, prefix + "Intensity", intensity_tree);
+    }else if(intensity_mode == 1){
+      AnimationClip[] template_intensity_anims = new AnimationClip[template_intensities.Length];
 
-      for(int i = 0; i < template_strength_anims.Length; i++){
-        template_strength_anims[i] = new AnimationClip();
+      for(int i = 0; i < template_intensity_anims.Length; i++){
+        template_intensity_anims[i] = new AnimationClip();
 
-        float val = template_strengths[i];
+        float val = template_intensities[i];
 
-        AddCurves(template_strength_anims[i], _lights, typeof(Light), "m_Intensity", val);
+        AddCurves(template_intensity_anims[i], _lights, typeof(Light), "m_Intensity", val);
 
-        AssetDatabase.CreateAsset(template_strength_anims[i], user_asset_path + "/strength_" + val.ToString() + ".anim");
+        AssetDatabase.CreateAsset(template_intensity_anims[i], user_asset_path + "/intensity_" + val.ToString() + ".anim");
 
-        AnimatorState state = CreateState(fx_layer, prefix + "Strength", template_strength_anims[i]);
+        AnimatorState state = CreateState(fx_layer, prefix + "Intensity", template_intensity_anims[i]);
 
-        AnimatorStateTransition transition = CreateAnyStateTransition(fx_layer, prefix + "Strength", state);
+        AnimatorStateTransition transition = CreateAnyStateTransition(fx_layer, prefix + "Intensity", state);
 
-        transition.AddCondition(AnimatorConditionMode.Equals, i, prefix + "Strength");
+        transition.AddCondition(AnimatorConditionMode.Equals, i, prefix + "Intensity");
       }
     }else{
-      if(target_light_spot != null) target_light_spot.intensity = single_strength;
-      if(target_light_point != null) target_light_point.intensity = single_strength;
+      if(target_light_spot != null) target_light_spot.intensity = single_intensity;
+      if(target_light_point != null) target_light_point.intensity = single_intensity;
     }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
