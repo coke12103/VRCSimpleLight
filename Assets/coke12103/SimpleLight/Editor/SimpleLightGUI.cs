@@ -550,21 +550,9 @@ public class SimpleLightGUI : EditorWindow
 
         string color_name = ColorUtility.ToHtmlStringRGB(template_colors[i]);
 
-        if(light_mode == 2){
-          AddCurve(template_color_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Color.r", r);
-          AddCurve(template_color_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Color.g", g);
-          AddCurve(template_color_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Color.b", b);
-
-          AddCurve(template_color_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Color.r", r);
-          AddCurve(template_color_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Color.g", g);
-          AddCurve(template_color_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Color.b", b);
-        }else{
-          Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
-
-          AddCurve(template_color_anims[i], target, typeof(Light), "m_Color.r", r);
-          AddCurve(template_color_anims[i], target, typeof(Light), "m_Color.g", g);
-          AddCurve(template_color_anims[i], target, typeof(Light), "m_Color.b", b);
-        }
+        AddCurves(template_color_anims[i], _lights, typeof(Light), "m_Color.r", r);
+        AddCurves(template_color_anims[i], _lights, typeof(Light), "m_Color.g", g);
+        AddCurves(template_color_anims[i], _lights, typeof(Light), "m_Color.b", b);
 
         AssetDatabase.CreateAsset(template_color_anims[i], user_asset_path + "/color_" + color_name + ".anim");
 
@@ -578,18 +566,7 @@ public class SimpleLightGUI : EditorWindow
     }
 
     if(strength_mode == 0){
-      // とりあえずサイズ2で生成
-      Transform[] lights = new Transform[2];
-
-      if(light_mode == 2){
-        lights[0] = target_light_spot.gameObject.transform;
-        lights[1] = target_light_point.gameObject.transform;
-      }else{
-        lights[0] = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
-        System.Array.Resize(ref lights, 1);
-      }
-
-      BlendTree strength_tree = CreateBlendTree("Strength", prefix + "Strength", lights, typeof(Light), "m_Intensity", min_strength, max_strength);
+      BlendTree strength_tree = CreateBlendTree("Strength", prefix + "Strength", _lights, typeof(Light), "m_Intensity", min_strength, max_strength);
 
       CreateState(fx_layer, prefix + "Strength", strength_tree);
     }else if(strength_mode == 1){
@@ -600,14 +577,7 @@ public class SimpleLightGUI : EditorWindow
 
         float val = template_strengths[i];
 
-        if(light_mode == 2){
-          AddCurve(template_strength_anims[i], target_light_spot.gameObject.transform, typeof(Light), "m_Intensity", val);
-          AddCurve(template_strength_anims[i], target_light_point.gameObject.transform, typeof(Light), "m_Intensity", val);
-        }else{
-          Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
-
-          AddCurve(template_strength_anims[i], target, typeof(Light), "m_Intensity", val);
-        }
+        AddCurves(template_strength_anims[i], _lights, typeof(Light), "m_Intensity", val);
 
         AssetDatabase.CreateAsset(template_strength_anims[i], user_asset_path + "/strength_" + val.ToString() + ".anim");
 
