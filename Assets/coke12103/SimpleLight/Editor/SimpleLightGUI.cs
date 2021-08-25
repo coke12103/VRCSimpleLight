@@ -630,6 +630,9 @@ public class SimpleLightGUI : EditorWindow
         AnimatorStateTransition transition = CreateAnyStateTransition(fx_layer, prefix + "Color", state);
         transition.AddCondition(AnimatorConditionMode.Equals, i, prefix + "Color");
       }
+    }else{
+      if(target_light_spot != null) target_light_spot.color = single_color;
+      if(target_light_point != null) target_light_point.color = single_color;
     }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
