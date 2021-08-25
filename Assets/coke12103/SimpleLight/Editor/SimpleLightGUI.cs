@@ -125,7 +125,7 @@ public class SimpleLightGUI : EditorWindow
       }else if(range_mode == 1){
         EditorGUILayout.LabelField("Range");
         for(int i = 0; i < template_ranges.Length; i++){
-          template_ranges[i] = EditorGUILayout.FloatField("Range " + (i + i), template_ranges[i]);
+          template_ranges[i] = EditorGUILayout.FloatField("Range " + (i + 1), template_ranges[i]);
         }
       }else if(range_mode == 2){
         single_range = EditorGUILayout.FloatField("Range", single_range);
@@ -592,16 +592,37 @@ public class SimpleLightGUI : EditorWindow
       if(target_light_point != null) target_light_point.intensity = single_intensity;
     }
 
+    if(range_mode == 0){
+      BlendTree range_tree = CreateBlendTree("Range", prefix + "Range", _lights, typeof(Light), "m_Range", min_range, max_range);
+
+      CreateState(fx_layer, prefix + "Range", range_tree);
+    }else if(range_mode == 1){
+      AnimationClip[] template_range_anims = new AnimationClip[template_ranges.Length];
+
+      for(int i = 0; i < template_range_anims.Length; i++){
+        template_range_anims[i] = new AnimationClip();
+
+        float val = template_ranges[i];
+
+        AddCurves(template_range_anims[i], _lights, typeof(Light), "m_Range", val);
+
+        AssetDatabase.CreateAsset(template_range_anims[i], user_asset_path + "/range_" + val.ToString() + ".anim");
+
+        AnimatorState state = CreateState(fx_layer, prefix + "Range", template_range_anims[i]);
+
+        AnimatorStateTransition transition = CreateAnyStateTransition(fx_layer, prefix + "Range", state);
+
+        transition.AddCondition(AnimatorConditionMode.Equals, i, prefix + "Range");
+      }
+    }else{
+      if(target_light_spot != null) target_light_spot.range = single_range;
+      if(target_light_point != null) target_light_point.range = single_range;
+    }
+
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
 
-//
-//    // float range / int range
-//    if(range_mode == 0 || range_mode == 1){
-//      fx_layer.AddParameter(prefix + "Range", range_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
-//    }
-//
 //    // spotのみの設定値
 //    // float angle / int angle
 //    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
