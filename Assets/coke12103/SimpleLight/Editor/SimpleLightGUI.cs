@@ -530,67 +530,20 @@ public class SimpleLightGUI : EditorWindow
     }
 
     if(color_mode == 0){
-      BlendTree color_r_tree = CreateBlendTree("ColorR", prefix + "ColorR");
-      BlendTree color_g_tree = CreateBlendTree("ColorG", prefix + "ColorG");
-      BlendTree color_b_tree = CreateBlendTree("ColorB", prefix + "ColorB");
-
-      AnimationClip color_r_zero_anim = new AnimationClip();
-      AnimationClip color_g_zero_anim = new AnimationClip();
-      AnimationClip color_b_zero_anim = new AnimationClip();
-
-      AnimationClip color_r_one_anim = new AnimationClip();
-      AnimationClip color_g_one_anim = new AnimationClip();
-      AnimationClip color_b_one_anim = new AnimationClip();
+      // とりあえずサイズ2で生成
+      Transform[] lights = new Transform[2];
 
       if(light_mode == 2){
-        // R
-        AddCurve(color_r_zero_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.r", 0);
-        AddCurve(color_r_zero_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.r", 0);
-
-        AddCurve(color_r_one_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.r", 1);
-        AddCurve(color_r_one_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.r", 1);
-
-        // G
-        AddCurve(color_g_zero_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.g", 0);
-        AddCurve(color_g_zero_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.g", 0);
-
-        AddCurve(color_g_one_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.g", 1);
-        AddCurve(color_g_one_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.g", 1);
-
-        // B
-        AddCurve(color_b_zero_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.b", 0);
-        AddCurve(color_b_zero_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.b", 0);
-
-        AddCurve(color_b_one_anim, target_light_spot.gameObject.transform, typeof(Light), "m_Color.b", 1);
-        AddCurve(color_b_one_anim, target_light_point.gameObject.transform, typeof(Light), "m_Color.b", 1);
+        lights[0] = target_light_spot.gameObject.transform;
+        lights[1] = target_light_point.gameObject.transform;
       }else{
-        Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
-
-        AddCurve(color_r_zero_anim, target, typeof(Light), "m_Color.r", 0);
-        AddCurve(color_r_one_anim, target, typeof(Light), "m_Color.r", 1);
-
-        AddCurve(color_g_zero_anim, target, typeof(Light), "m_Color.g", 0);
-        AddCurve(color_g_one_anim, target, typeof(Light), "m_Color.g", 1);
-
-        AddCurve(color_b_zero_anim, target, typeof(Light), "m_Color.b", 0);
-        AddCurve(color_b_one_anim, target, typeof(Light), "m_Color.b", 1);
+        lights[0] = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
+        System.Array.Resize(ref lights, 1);
       }
 
-      AssetDatabase.CreateAsset(color_r_zero_anim, user_asset_path + "/color_r_zero.anim");
-      AssetDatabase.CreateAsset(color_g_zero_anim, user_asset_path + "/color_g_zero.anim");
-      AssetDatabase.CreateAsset(color_b_zero_anim, user_asset_path + "/color_b_zero.anim");
-
-      AssetDatabase.CreateAsset(color_r_one_anim, user_asset_path + "/color_r_one.anim");
-      AssetDatabase.CreateAsset(color_g_one_anim, user_asset_path + "/color_g_one.anim");
-      AssetDatabase.CreateAsset(color_b_one_anim, user_asset_path + "/color_b_one.anim");
-
-      color_r_tree.AddChild(color_r_zero_anim, 0);
-      color_g_tree.AddChild(color_g_zero_anim, 0);
-      color_b_tree.AddChild(color_b_zero_anim, 0);
-
-      color_r_tree.AddChild(color_r_one_anim, 1);
-      color_g_tree.AddChild(color_g_one_anim, 1);
-      color_b_tree.AddChild(color_b_one_anim, 1);
+      BlendTree color_r_tree = CreateBlendTree("ColorR", prefix + "ColorR", lights, typeof(Light), "m_Color.r", 0, 1);
+      BlendTree color_g_tree = CreateBlendTree("ColorG", prefix + "ColorG", lights, typeof(Light), "m_Color.g", 0, 1);
+      BlendTree color_b_tree = CreateBlendTree("ColorB", prefix + "ColorB", lights, typeof(Light), "m_Color.b", 0, 1);
 
       CreateState(fx_layer, prefix + "ColorR", color_r_tree);
       CreateState(fx_layer, prefix + "ColorG", color_g_tree);
