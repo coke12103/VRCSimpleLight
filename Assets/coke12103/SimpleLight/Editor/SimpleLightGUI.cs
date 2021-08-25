@@ -707,16 +707,6 @@ public class SimpleLightGUI : EditorWindow
     return tree;
   }
 
-  BlendTree CreateBlendTree(string name, string param){
-    BlendTree tree = new BlendTree();
-
-    tree.name = name;
-    tree.blendType = BlendTreeType.Simple1D;
-    tree.blendParameter = param;
-
-    return tree;
-  }
-
   // ない場合は想定しない(実装的にない場合は例外なので)
   int GetLayerIndex(AnimatorController anim, string name){
     AnimatorControllerLayer[] layers = anim.layers;
