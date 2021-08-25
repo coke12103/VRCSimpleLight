@@ -470,15 +470,18 @@ public class SimpleLightGUI : EditorWindow
 
     AnimationClip off_anim = new AnimationClip();
 
-    // 単体か
-    if(light_mode == 2){
-      AddCurve(off_anim, target_light_spot.gameObject.transform, typeof(GameObject), "m_IsActive", 0);
-      AddCurve(off_anim, target_light_point.gameObject.transform, typeof(GameObject), "m_IsActive", 0);
-    }else{
-      Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
+    // とりあえずサイズ2で生成
+    Transform[] _lights = new Transform[2];
 
-      AddCurve(off_anim, target, typeof(GameObject), "m_IsActive", 0);
+    if(light_mode == 2){
+      _lights[0] = target_light_spot.gameObject.transform;
+      _lights[1] = target_light_point.gameObject.transform;
+    }else{
+      _lights[0] = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
+      System.Array.Resize(ref _lights, 1);
     }
+
+    AddCurves(off_anim, _lights, typeof(GameObject), "m_IsActive", 0);
 
     AssetDatabase.CreateAsset(off_anim, user_asset_path + "/off.anim");
 
@@ -516,9 +519,7 @@ public class SimpleLightGUI : EditorWindow
     }else{
       AnimationClip on_anim = new AnimationClip();
 
-      Transform target = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
-
-      AddCurve(on_anim, target, typeof(GameObject), "m_IsActive", 1);
+      AddCurves(on_anim, _lights, typeof(GameObject), "m_IsActive", 1);
 
       AssetDatabase.CreateAsset(on_anim, user_asset_path + "/on.anim");
 
@@ -530,20 +531,9 @@ public class SimpleLightGUI : EditorWindow
     }
 
     if(color_mode == 0){
-      // とりあえずサイズ2で生成
-      Transform[] lights = new Transform[2];
-
-      if(light_mode == 2){
-        lights[0] = target_light_spot.gameObject.transform;
-        lights[1] = target_light_point.gameObject.transform;
-      }else{
-        lights[0] = (light_mode == 0 ? target_light_spot : target_light_point).gameObject.transform;
-        System.Array.Resize(ref lights, 1);
-      }
-
-      BlendTree color_r_tree = CreateBlendTree("ColorR", prefix + "ColorR", lights, typeof(Light), "m_Color.r", 0, 1);
-      BlendTree color_g_tree = CreateBlendTree("ColorG", prefix + "ColorG", lights, typeof(Light), "m_Color.g", 0, 1);
-      BlendTree color_b_tree = CreateBlendTree("ColorB", prefix + "ColorB", lights, typeof(Light), "m_Color.b", 0, 1);
+      BlendTree color_r_tree = CreateBlendTree("ColorR", prefix + "ColorR", _lights, typeof(Light), "m_Color.r", 0, 1);
+      BlendTree color_g_tree = CreateBlendTree("ColorG", prefix + "ColorG", _lights, typeof(Light), "m_Color.g", 0, 1);
+      BlendTree color_b_tree = CreateBlendTree("ColorB", prefix + "ColorB", _lights, typeof(Light), "m_Color.b", 0, 1);
 
       CreateState(fx_layer, prefix + "ColorR", color_r_tree);
       CreateState(fx_layer, prefix + "ColorG", color_g_tree);
@@ -658,6 +648,14 @@ public class SimpleLightGUI : EditorWindow
     curve.AddKey(0, value);
 
     clip.SetCurve(path, target_type, key, curve);
+  }
+
+  // AddCurveの複数対象一括版
+  void AddCurves(AnimationClip clip, Transform[] targets, System.Type target_type, string key, float value){
+    for(int i = 0; i < targets.Length; i++){
+      Transform target = targets[i];
+      AddCurve(clip, target, target_type, key, value);
+    }
   }
 
   AnimatorState CreateState(AnimatorController anim, string layer_name, Motion motion){
