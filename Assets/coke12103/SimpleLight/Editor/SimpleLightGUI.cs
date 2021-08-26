@@ -652,12 +652,6 @@ public class SimpleLightGUI : EditorWindow
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
-
-//    // spotのみの設定値
-//    // float angle / int angle
-//    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
-//      fx_layer.AddParameter(prefix + "Angle", angle_mode == 0 ? AnimatorControllerParameterType.Float : AnimatorControllerParameterType.Int);
-//    }
   }
 
   void AddCurve(AnimationClip clip, Transform target, System.Type target_type, string key, float value){
