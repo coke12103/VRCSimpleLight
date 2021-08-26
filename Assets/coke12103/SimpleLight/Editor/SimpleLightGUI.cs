@@ -137,7 +137,7 @@ public class SimpleLightGUI : EditorWindow
 
         if(angle_mode == 0){
           min_angle = EditorGUILayout.FloatField("Min angle", min_angle);
-          max_range = EditorGUILayout.FloatField("Max angle", max_range);
+          max_angle = EditorGUILayout.FloatField("Max angle", max_angle);
         }else if(angle_mode == 1){
           EditorGUILayout.LabelField("Angle");
 
@@ -617,6 +617,36 @@ public class SimpleLightGUI : EditorWindow
     }else{
       if(target_light_spot != null) target_light_spot.range = single_range;
       if(target_light_point != null) target_light_point.range = single_range;
+    }
+
+    if(light_mode == 0 || light_mode == 2){
+      Transform[] spot = new Transform[]{ target_light_spot.gameObject.transform };
+
+      if(angle_mode == 0){
+        BlendTree angle_tree = CreateBlendTree("Angle", prefix + "Angle", spot, typeof(Light), "m_SpotAngle", min_angle, max_angle);
+
+        CreateState(fx_layer, prefix + "Angle", angle_tree);
+      }else if(angle_mode == 1){
+        AnimationClip[] template_angle_anims = new AnimationClip[template_angles.Length];
+
+        for(int i = 0; i < template_angle_anims.Length; i++){
+          template_angle_anims[i] = new AnimationClip();
+
+          float val = template_angles[i];
+
+          AddCurves(template_angle_anims[i], spot, typeof(Light), "m_SpotAngle", val);
+
+          AssetDatabase.CreateAsset(template_angle_anims[i], user_asset_path + "/angle_" + val.ToString() + ".anim");
+
+          AnimatorState state = CreateState(fx_layer, prefix + "Angle", template_angle_anims[i]);
+
+          AnimatorStateTransition transition = CreateAnyStateTransition(fx_layer, prefix + "Angle", state);
+
+          transition.AddCondition(AnimatorConditionMode.Equals, i, prefix + "Angle");
+        }
+      }else{
+        target_light_spot.spotAngle = single_angle;
+      }
     }
 
     // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
