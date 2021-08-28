@@ -149,7 +149,7 @@ public class SimpleLightGUI : EditorWindow
         }
       }
 
-      EditorGUILayout.HelpBox("使用パラメーター: " + CountParams().ToString(), MessageType.Info);
+      EditorGUILayout.HelpBox("使用パラメーター: " + CountExMemory().ToString(), MessageType.Info);
 
       EditorGUILayout.HelpBox(message, MessageType.Info);
 
@@ -179,7 +179,7 @@ public class SimpleLightGUI : EditorWindow
     return true;
   }
 
-  int CountParams(){
+  int CountExMemory(){
     // bool on/off 1bit
     int result = 1;
 
@@ -204,6 +204,31 @@ public class SimpleLightGUI : EditorWindow
     return result;
   }
 
+  int CountParams(){
+    // bool on/off 1bit
+    int result = 1;
+
+    // bool spot/point 1bit
+    if(light_mode == 2) result += 1;
+
+    // float color(r, g, b) 8bit * 3
+    if(color_mode == 0) result += 3;
+    // int color template 8bit
+    else if(color_mode == 1) result += 1;
+
+    // float intensity 8bit / int intensity 8bit
+    if(intensity_mode == 0 || intensity_mode == 1) result += 1;
+
+    // float range 8bit / int range 8bit
+    if(range_mode == 0 || range_mode == 1) result += 1;
+
+    // spotのみの設定値
+    // float angle 8bit / int angle 8bit
+    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)) result += 1;
+
+    return result;
+  }
+
   void Install(){
     Debug.Log("button");
 
@@ -220,6 +245,7 @@ public class SimpleLightGUI : EditorWindow
     CreateAnimatorLayer();
     FixLightsSetting();
     CreateAndBuildAnimation();
+    CreateExParam();
   }
 
   void CheckInstallCondition(){
@@ -339,18 +365,22 @@ public class SimpleLightGUI : EditorWindow
     ExpressionParameter[] orig_ex_params = ex_param.parameters;
     ExpressionParameter[] removed_ex_params = new ExpressionParameter[orig_ex_params.Length];
 
+    int count = 0;
+
     for(int i = 0; i < orig_ex_params.Length; i++){
       ExpressionParameter param = orig_ex_params[i];
 
-      // 空のパラメーター消せるけどなんとなく無視する
-      if(!param.name.StartsWith(prefix)){
+      if(!param.name.StartsWith(prefix) && !(param.name == "")){
         removed_ex_params[i] = param;
+        count++;
       }else{
         Debug.Log("Removed: " + param.name);
       }
-
-      ex_param.parameters = removed_ex_params;
     }
+
+    System.Array.Resize(ref removed_ex_params, count);
+
+    ex_param.parameters = removed_ex_params;
   }
 
   void RemoveOldExMenu(){
@@ -654,6 +684,46 @@ public class SimpleLightGUI : EditorWindow
     AssetDatabase.Refresh();
   }
 
+  void CreateExParam(){
+    ExpressionParameters ex_param = target_avatar.expressionParameters;
+
+    ExpressionParameter[] ex_params = ex_param.parameters;
+
+    // bool on/off
+    AddExParam(ref ex_params, prefix + "Enable", ExpressionParameters.ValueType.Bool);
+
+    // bool spot/point
+    if(light_mode == 2) AddExParam(ref ex_params, prefix + "Mode", ExpressionParameters.ValueType.Bool);
+
+    if(color_mode == 0){
+      // float color(r, g, b)
+      AddExParam(ref ex_params, prefix + "ColorR", ExpressionParameters.ValueType.Float);
+      AddExParam(ref ex_params, prefix + "ColorG", ExpressionParameters.ValueType.Float);
+      AddExParam(ref ex_params, prefix + "ColorB", ExpressionParameters.ValueType.Float);
+    }else if(color_mode == 1){
+      // int color template
+      AddExParam(ref ex_params, prefix + "Color", ExpressionParameters.ValueType.Int);
+    }
+    
+    // float intensity / int intensity
+    if(intensity_mode == 0 || intensity_mode == 1){
+      AddExParam(ref ex_params, prefix + "Intensity", intensity_mode == 0 ? ExpressionParameters.ValueType.Float : ExpressionParameters.ValueType.Int);
+    }
+
+    // float range / int range
+    if(range_mode == 0 || range_mode == 1){
+      AddExParam(ref ex_params, prefix + "Range", range_mode == 0 ? ExpressionParameters.ValueType.Float : ExpressionParameters.ValueType.Int);
+    }
+
+    // spotのみの設定値
+    // float angle / int angle
+    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)){
+      AddExParam(ref ex_params, prefix + "Angle", angle_mode == 0 ? ExpressionParameters.ValueType.Float : ExpressionParameters.ValueType.Int);
+    }
+
+    ex_param.parameters = ex_params;
+  }
+
   void AddCurve(AnimationClip clip, Transform target, System.Type target_type, string key, float value){
     AnimationCurve curve = new AnimationCurve();
 
@@ -744,5 +814,13 @@ public class SimpleLightGUI : EditorWindow
     }
 
     throw new System.Exception("そんなやつない");
+  }
+
+  void AddExParam(ref ExpressionParameter[] ex_params, string name, ExpressionParameters.ValueType type){
+    System.Array.Resize(ref ex_params, ex_params.Length + 1);
+
+    ex_params[ex_params.Length -1] = new ExpressionParameter();
+    ex_params[ex_params.Length -1].name = name;
+    ex_params[ex_params.Length -1].valueType = type;
   }
 }
