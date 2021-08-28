@@ -246,6 +246,7 @@ public class SimpleLightGUI : EditorWindow
     FixLightsSetting();
     CreateAndBuildAnimation();
     CreateExParam();
+    CreateExMenu();
   }
 
   void CheckInstallCondition(){
@@ -724,6 +725,112 @@ public class SimpleLightGUI : EditorWindow
     ex_param.parameters = ex_params;
   }
 
+  void CreateExMenu(){
+    ExpressionsMenu sub_menu = CreateMenu("SubMenu");
+    // TODO: ExMenuが埋まってるかのチェック
+    ExpressionsMenu ex_menu = target_avatar.expressionsMenu;
+
+    ExpressionsControl sub_menu_control = CreateExControl(prefix, ExpressionsControl.ControlType.SubMenu, "", 0);
+    sub_menu_control.subMenu = sub_menu;
+    ex_menu.controls.Add(sub_menu_control);
+
+    ExpressionsControl enable_control = CreateExControl("Enable", ExpressionsControl.ControlType.Toggle, prefix + "Enable", 0);
+    sub_menu.controls.Add(enable_control);
+
+    // bool spot/point
+    if(light_mode == 2) {
+      ExpressionsControl mode_control = CreateExControl("Spot/Point", ExpressionsControl.ControlType.Toggle, prefix + "Mode", 0);
+      sub_menu.controls.Add(mode_control);
+    }
+
+    if(color_mode == 0){
+      // float color(r, g, b)
+      ExpressionsControl color_r_control = CreateExControl("Color R", ExpressionsControl.ControlType.RadialPuppet, prefix + "ColorR", 0);
+      ExpressionsControl color_g_control = CreateExControl("Color G", ExpressionsControl.ControlType.RadialPuppet, prefix + "ColorG", 0);
+      ExpressionsControl color_b_control = CreateExControl("Color B", ExpressionsControl.ControlType.RadialPuppet, prefix + "ColorB", 0);
+      sub_menu.controls.Add(color_r_control);
+      sub_menu.controls.Add(color_g_control);
+      sub_menu.controls.Add(color_b_control);
+    }else if(color_mode == 1){
+      // int color template
+      ExpressionsMenu color_menu = CreateMenu("ColorMenu");
+
+      ExpressionsControl[] template_color_controls = new ExpressionsControl[template_colors.Length];
+      
+      for(int i = 0; i < template_color_controls.Length; i++){
+        string color_name = ColorUtility.ToHtmlStringRGB(template_colors[i]);
+
+        template_color_controls[i] = CreateExControl(color_name, ExpressionsControl.ControlType.Toggle, prefix + "Color", i);
+      }
+
+      color_menu.controls.AddRange(template_color_controls);
+
+      ExpressionsControl color_menu_control = CreateExControl("Color", ExpressionsControl.ControlType.SubMenu, prefix + "Color", 0);
+      color_menu_control.subMenu = color_menu;
+      sub_menu.controls.Add(color_menu_control);
+    }
+    
+    // float intensity / int intensity
+    if(intensity_mode == 0){
+      ExpressionsControl intensity_control = CreateExControl("Intensity", ExpressionsControl.ControlType.RadialPuppet, prefix + "Intensity", 0);
+      sub_menu.controls.Add(intensity_control);
+    }else if(intensity_mode == 1){
+      ExpressionsMenu intensity_menu = CreateMenu("IntensityMenu");
+
+      ExpressionsControl[] template_intensity_controls = new ExpressionsControl[template_intensities.Length];
+      
+      for(int i = 0; i < template_intensity_controls.Length; i++){
+        template_intensity_controls[i] = CreateExControl(template_intensities[i].ToString(), ExpressionsControl.ControlType.Toggle, prefix + "Intensity", i);
+      }
+
+      intensity_menu.controls.AddRange(template_intensity_controls);
+
+      ExpressionsControl intensity_menu_control = CreateExControl("Intensity", ExpressionsControl.ControlType.SubMenu, "", 0);
+      intensity_menu_control.subMenu = intensity_menu;
+      sub_menu.controls.Add(intensity_menu_control);
+    }
+
+    if(range_mode == 0){
+      ExpressionsControl range_control = CreateExControl("Range", ExpressionsControl.ControlType.RadialPuppet, prefix + "Range", 0);
+      sub_menu.controls.Add(range_control);
+    }else if(range_mode == 1){
+      ExpressionsMenu range_menu = CreateMenu("RangeMenu");
+
+      ExpressionsControl[] template_range_controls = new ExpressionsControl[template_ranges.Length];
+      
+      for(int i = 0; i < template_range_controls.Length; i++){
+        template_range_controls[i] = CreateExControl(template_ranges[i].ToString(), ExpressionsControl.ControlType.Toggle, prefix + "Range", i);
+      }
+
+      range_menu.controls.AddRange(template_range_controls);
+
+      ExpressionsControl range_menu_control = CreateExControl("Range", ExpressionsControl.ControlType.SubMenu, "", 0);
+      range_menu_control.subMenu = range_menu;
+      sub_menu.controls.Add(range_menu_control);
+    }
+
+    if(light_mode == 0 || light_mode == 2){
+      if(angle_mode == 0){
+        ExpressionsControl angle_control = CreateExControl("Angle", ExpressionsControl.ControlType.RadialPuppet, prefix + "Angle", 0);
+        sub_menu.controls.Add(angle_control);
+      }else if(angle_mode == 1){
+        ExpressionsMenu angle_menu = CreateMenu("AngleMenu");
+
+        ExpressionsControl[] template_angle_controls = new ExpressionsControl[template_angles.Length];
+        
+        for(int i = 0; i < template_angle_controls.Length; i++){
+          template_angle_controls[i] = CreateExControl(template_angles[i].ToString(), ExpressionsControl.ControlType.Toggle, prefix + "Angle", i);
+        }
+
+        angle_menu.controls.AddRange(template_angle_controls);
+
+        ExpressionsControl angle_menu_control = CreateExControl("Angle", ExpressionsControl.ControlType.SubMenu, "", 0);
+        angle_menu_control.subMenu = angle_menu;
+        sub_menu.controls.Add(angle_menu_control);
+      }
+    }
+  }
+
   void AddCurve(AnimationClip clip, Transform target, System.Type target_type, string key, float value){
     AnimationCurve curve = new AnimationCurve();
 
@@ -822,5 +929,37 @@ public class SimpleLightGUI : EditorWindow
     ex_params[ex_params.Length -1] = new ExpressionParameter();
     ex_params[ex_params.Length -1].name = name;
     ex_params[ex_params.Length -1].valueType = type;
+  }
+
+  ExpressionsControl CreateExControl(string name, ExpressionsControl.ControlType type, string param_name, int value){
+    ExpressionsControl ex_control = new ExpressionsControl();
+
+    ex_control.name = name;
+    ex_control.type = type;
+
+    if(type != ExpressionsControl.ControlType.SubMenu && type != ExpressionsControl.ControlType.RadialPuppet){
+      ex_control.parameter = new ExpressionsControl.Parameter();
+      ex_control.parameter.name = param_name;
+    }else if(type == ExpressionsControl.ControlType.RadialPuppet){
+      ex_control.subParameters = new ExpressionsControl.Parameter[1];
+      ex_control.subParameters[0] = new ExpressionsControl.Parameter();
+      ex_control.subParameters[0].name = param_name;
+    }
+
+    if(type == ExpressionsControl.ControlType.Toggle){
+      ex_control.value = value;
+    }
+
+    return ex_control;
+  }
+
+  ExpressionsMenu CreateMenu(string name){
+    // ExMenuない処理
+    string menu_path = user_asset_path + "/" + name + ".asset";
+
+    AssetDatabase.CopyAsset(default_ex_menu_path, menu_path);
+    ExpressionsMenu menu = AssetDatabase.LoadAssetAtPath(menu_path, typeof(ExpressionsMenu)) as ExpressionsMenu;
+
+    return menu;
   }
 }
