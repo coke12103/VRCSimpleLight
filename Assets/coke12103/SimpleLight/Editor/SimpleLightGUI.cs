@@ -247,6 +247,8 @@ public class SimpleLightGUI : EditorWindow
     CreateAndBuildAnimation();
     CreateExParam();
     CreateExMenu();
+    // ここまで追加処理
+    SaveAssets();
   }
 
   void CheckInstallCondition(){
@@ -562,13 +564,9 @@ public class SimpleLightGUI : EditorWindow
     }
 
     if(color_mode == 0){
-      BlendTree color_r_tree = CreateBlendTree("ColorR", prefix + "ColorR", _lights, typeof(Light), "m_Color.r", 0, 1);
-      BlendTree color_g_tree = CreateBlendTree("ColorG", prefix + "ColorG", _lights, typeof(Light), "m_Color.g", 0, 1);
-      BlendTree color_b_tree = CreateBlendTree("ColorB", prefix + "ColorB", _lights, typeof(Light), "m_Color.b", 0, 1);
-
-      CreateState(fx_layer, prefix + "ColorR", color_r_tree);
-      CreateState(fx_layer, prefix + "ColorG", color_g_tree);
-      CreateState(fx_layer, prefix + "ColorB", color_b_tree);
+      AddBlendTree(fx_layer, prefix + "ColorR", "ColorR", prefix + "ColorR", _lights, typeof(Light), "m_Color.r", 0, 1);
+      AddBlendTree(fx_layer, prefix + "ColorG", "ColorG", prefix + "ColorG", _lights, typeof(Light), "m_Color.g", 0, 1);
+      AddBlendTree(fx_layer, prefix + "ColorB", "ColorB", prefix + "ColorB", _lights, typeof(Light), "m_Color.b", 0, 1);
     }else if(color_mode == 1){
       AnimationClip[] template_color_anims = new AnimationClip[template_colors.Length];
       
@@ -597,9 +595,7 @@ public class SimpleLightGUI : EditorWindow
     }
 
     if(intensity_mode == 0){
-      BlendTree intensity_tree = CreateBlendTree("Intensity", prefix + "Intensity", _lights, typeof(Light), "m_Intensity", min_intensity, max_intensity);
-
-      CreateState(fx_layer, prefix + "Intensity", intensity_tree);
+      AddBlendTree(fx_layer, prefix + "Intensity", "Intensity", prefix + "Intensity", _lights, typeof(Light), "m_Intensity", min_intensity, max_intensity);
     }else if(intensity_mode == 1){
       AnimationClip[] template_intensity_anims = new AnimationClip[template_intensities.Length];
 
@@ -624,9 +620,7 @@ public class SimpleLightGUI : EditorWindow
     }
 
     if(range_mode == 0){
-      BlendTree range_tree = CreateBlendTree("Range", prefix + "Range", _lights, typeof(Light), "m_Range", min_range, max_range);
-
-      CreateState(fx_layer, prefix + "Range", range_tree);
+      AddBlendTree(fx_layer, prefix + "Range", "Range", prefix + "Range", _lights, typeof(Light), "m_Range", min_range, max_range);
     }else if(range_mode == 1){
       AnimationClip[] template_range_anims = new AnimationClip[template_ranges.Length];
 
@@ -654,9 +648,7 @@ public class SimpleLightGUI : EditorWindow
       Transform[] spot = new Transform[]{ target_light_spot.gameObject.transform };
 
       if(angle_mode == 0){
-        BlendTree angle_tree = CreateBlendTree("Angle", prefix + "Angle", spot, typeof(Light), "m_SpotAngle", min_angle, max_angle);
-
-        CreateState(fx_layer, prefix + "Angle", angle_tree);
+        AddBlendTree(fx_layer, prefix + "Angle", "Angle", prefix + "Angle", spot, typeof(Light), "m_SpotAngle", min_angle, max_angle);
       }else if(angle_mode == 1){
         AnimationClip[] template_angle_anims = new AnimationClip[template_angles.Length];
 
@@ -734,12 +726,12 @@ public class SimpleLightGUI : EditorWindow
     sub_menu_control.subMenu = sub_menu;
     ex_menu.controls.Add(sub_menu_control);
 
-    ExpressionsControl enable_control = CreateExControl("Enable", ExpressionsControl.ControlType.Toggle, prefix + "Enable", 0);
+    ExpressionsControl enable_control = CreateExControl("Enable", ExpressionsControl.ControlType.Toggle, prefix + "Enable", 1);
     sub_menu.controls.Add(enable_control);
 
     // bool spot/point
     if(light_mode == 2) {
-      ExpressionsControl mode_control = CreateExControl("Spot/Point", ExpressionsControl.ControlType.Toggle, prefix + "Mode", 0);
+      ExpressionsControl mode_control = CreateExControl("Spot/Point", ExpressionsControl.ControlType.Toggle, prefix + "Mode", 1);
       sub_menu.controls.Add(mode_control);
     }
 
@@ -829,6 +821,17 @@ public class SimpleLightGUI : EditorWindow
         sub_menu.controls.Add(angle_menu_control);
       }
     }
+
+    EditorUtility.SetDirty(sub_menu);
+  }
+
+  void SaveAssets(){
+    EditorUtility.SetDirty(target_avatar.baseAnimationLayers[fx_index].animatorController);
+    EditorUtility.SetDirty(target_avatar.expressionsMenu);
+    EditorUtility.SetDirty(target_avatar.expressionParameters);
+
+    AssetDatabase.SaveAssets();
+    AssetDatabase.Refresh();
   }
 
   void AddCurve(AnimationClip clip, Transform target, System.Type target_type, string key, float value){
@@ -859,6 +862,8 @@ public class SimpleLightGUI : EditorWindow
 
     state.motion = motion;
 
+    EditorUtility.SetDirty(state_machine);
+
     // NOTE: UnityのドキュメントにはLayersはコピーだから変更したら戻せよって書いてあるんだけど何故か上書きしなくても反映されてしかもディスクへの書き出しまでされる。怖いから一応やる。
     anim.layers = layers;
 
@@ -875,20 +880,23 @@ public class SimpleLightGUI : EditorWindow
     transition.duration = 0;
     transition.hasExitTime = false;
 
+    EditorUtility.SetDirty(machine);
+
     anim.layers = layers;
 
     return transition;
   }
 
-  BlendTree CreateBlendTree(string name, string param, Transform[] targets, System.Type target_type, string value_key, float min, float max){
+  void AddBlendTree(AnimatorController anim, string layer_name, string name, string param, Transform[] targets, System.Type target_type, string value_key, float min, float max){
+    int layer_index = GetLayerIndex(anim, layer_name);
     string low_name = name.ToLower();
 
-    BlendTree tree = new BlendTree();
+    BlendTree tree;
+    AnimatorState state = anim.CreateBlendTreeInController(name, out tree, layer_index);
 
     AnimationClip zero_anim = new AnimationClip();
     AnimationClip one_anim = new AnimationClip();
 
-    tree.name = name;
     tree.blendType = BlendTreeType.Simple1D;
     tree.blendParameter = param;
 
@@ -904,8 +912,6 @@ public class SimpleLightGUI : EditorWindow
 
     tree.AddChild(zero_anim, 0);
     tree.AddChild(one_anim, 1);
-
-    return tree;
   }
 
   // ない場合は想定しない(実装的にない場合は例外なので)
