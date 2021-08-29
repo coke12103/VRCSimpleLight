@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+   
+    - name: Get tag name
+      uses: olegtarasov/get-tag@v2.1
+      id: tagName
+    
+    - name: Setup package build
+      run: |
+        echo "Assets/coke12103.meta" > metaList
+        find Assets/coke12103/ -name \*.meta >> metaList
+        mkdir output
+        
+    - name: Create unitypackage
+      uses: pCYSl5EDgo/create-unitypackage@master
+      with:
+        package-path: 'output/output.unitypackage'
+        include-files: metaList
+    
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: false
+        prerelease: false   
+
+    - name: Upload Release Asset
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/upload-release-asset@master
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: output/output.unitypackage
+        asset_name: SimpleLight_${{ steps.tagName.outputs.tag }}.unitypackage
+        asset_content_type: application/gzip
+
