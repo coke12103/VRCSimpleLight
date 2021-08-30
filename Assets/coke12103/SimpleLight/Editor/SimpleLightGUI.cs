@@ -62,6 +62,7 @@ public class SimpleLightGUI : EditorWindow
 
   // その他
   private string message;
+  private Vector2 scroll_pos;
 
   [MenuItem("SimpleLight/Editor")]
   private static void Create(){
@@ -69,85 +70,89 @@ public class SimpleLightGUI : EditorWindow
   }
 
   private void OnGUI(){
+    // これいる？
     EditorGUILayout.LabelField("SimpleLightのインストール");
 
     target_avatar = EditorGUILayout.ObjectField("Avatar", target_avatar, typeof(AvatarDescriptor), true) as AvatarDescriptor;
 
     // そもそもAvatarがなければ無効化する
     EditorGUI.BeginDisabledGroup(target_avatar == null);
-      light_mode = EditorGUILayout.Popup("Light type", light_mode, LightTypes);
+      scroll_pos = EditorGUILayout.BeginScrollView(scroll_pos);
+        light_mode = EditorGUILayout.Popup("Light type", light_mode, LightTypes);
 
-      // spot
-      if(light_mode == 0 || light_mode == 2){
-        target_light_spot = EditorGUILayout.ObjectField("Light(Spot)", target_light_spot, typeof(Light), true) as Light;
-      }
-
-      // point
-      if(light_mode == 1 || light_mode == 2){
-        target_light_point = EditorGUILayout.ObjectField("Light(Point)", target_light_point, typeof(Light), true) as Light;
-      }
-
-      // color
-      color_mode = EditorGUILayout.Popup("Color type", color_mode, ColorTypes);
-
-      if(color_mode == 1){
-        EditorGUILayout.LabelField("Colors");
-
-        for(int i = 0; i < template_colors.Length; i++){
-          template_colors[i] = EditorGUILayout.ColorField("Color " + (i + 1), template_colors[i]);
+        // spot
+        if(light_mode == 0 || light_mode == 2){
+          target_light_spot = EditorGUILayout.ObjectField("Light(Spot)", target_light_spot, typeof(Light), true) as Light;
         }
-      }else if(color_mode == 2){
-        single_color = EditorGUILayout.ColorField("Color", single_color);
-      }
 
-      // intensity
-      intensity_mode = EditorGUILayout.Popup("Intensity type", intensity_mode, IntensityTypes);
-
-      if(intensity_mode == 0){
-        min_intensity = EditorGUILayout.FloatField("Min intensity", min_intensity);
-        max_intensity = EditorGUILayout.FloatField("Max intensity", max_intensity);
-      }else if(intensity_mode == 1){
-        EditorGUILayout.LabelField("Intensity");
-
-        for(int i = 0; i < template_intensities.Length; i++){
-          template_intensities[i] = EditorGUILayout.FloatField("Intensity " + (i + 1), template_intensities[i]);
+        // point
+        if(light_mode == 1 || light_mode == 2){
+          target_light_point = EditorGUILayout.ObjectField("Light(Point)", target_light_point, typeof(Light), true) as Light;
         }
-      }else if(intensity_mode == 2){
-        single_intensity = EditorGUILayout.FloatField("Intensity", single_intensity);
-      }
 
-      // range
-      range_mode = EditorGUILayout.Popup("Range type", range_mode, RangeTypes);
+        // color
+        color_mode = EditorGUILayout.Popup("Color type", color_mode, ColorTypes);
 
-      if(range_mode == 0){
-        min_range = EditorGUILayout.FloatField("Min range", min_range);
-        max_range = EditorGUILayout.FloatField("Max range", max_range);
-      }else if(range_mode == 1){
-        EditorGUILayout.LabelField("Range");
-        for(int i = 0; i < template_ranges.Length; i++){
-          template_ranges[i] = EditorGUILayout.FloatField("Range " + (i + 1), template_ranges[i]);
-        }
-      }else if(range_mode == 2){
-        single_range = EditorGUILayout.FloatField("Range", single_range);
-      }
+        if(color_mode == 1){
+          EditorGUILayout.LabelField("Colors");
 
-      // angle
-      if(light_mode == 0 || light_mode == 2){
-        angle_mode = EditorGUILayout.Popup("Angle type", angle_mode, AngleTypes);
-
-        if(angle_mode == 0){
-          min_angle = EditorGUILayout.FloatField("Min angle", min_angle);
-          max_angle = EditorGUILayout.FloatField("Max angle", max_angle);
-        }else if(angle_mode == 1){
-          EditorGUILayout.LabelField("Angle");
-
-          for(int i = 0; i < template_angles.Length; i++){
-            template_angles[i] = EditorGUILayout.FloatField("Angle " + (i + 1), template_angles[i]);
+          for(int i = 0; i < template_colors.Length; i++){
+            template_colors[i] = EditorGUILayout.ColorField("Color " + (i + 1), template_colors[i]);
           }
-        }else if(angle_mode == 2){
-          single_angle = EditorGUILayout.FloatField("Angle", single_angle);
+        }else if(color_mode == 2){
+          single_color = EditorGUILayout.ColorField("Color", single_color);
         }
-      }
+
+        // intensity
+        intensity_mode = EditorGUILayout.Popup("Intensity type", intensity_mode, IntensityTypes);
+
+        if(intensity_mode == 0){
+          min_intensity = EditorGUILayout.FloatField("Min intensity", min_intensity);
+          max_intensity = EditorGUILayout.FloatField("Max intensity", max_intensity);
+        }else if(intensity_mode == 1){
+          EditorGUILayout.LabelField("Intensity");
+
+          for(int i = 0; i < template_intensities.Length; i++){
+            template_intensities[i] = EditorGUILayout.FloatField("Intensity " + (i + 1), template_intensities[i]);
+          }
+        }else if(intensity_mode == 2){
+          single_intensity = EditorGUILayout.FloatField("Intensity", single_intensity);
+        }
+
+        // range
+        range_mode = EditorGUILayout.Popup("Range type", range_mode, RangeTypes);
+
+        if(range_mode == 0){
+          min_range = EditorGUILayout.FloatField("Min range", min_range);
+          max_range = EditorGUILayout.FloatField("Max range", max_range);
+        }else if(range_mode == 1){
+          EditorGUILayout.LabelField("Range");
+          for(int i = 0; i < template_ranges.Length; i++){
+            template_ranges[i] = EditorGUILayout.FloatField("Range " + (i + 1), template_ranges[i]);
+          }
+        }else if(range_mode == 2){
+          single_range = EditorGUILayout.FloatField("Range", single_range);
+        }
+
+        // angle
+        if(light_mode == 0 || light_mode == 2){
+          angle_mode = EditorGUILayout.Popup("Angle type", angle_mode, AngleTypes);
+
+          if(angle_mode == 0){
+            min_angle = EditorGUILayout.FloatField("Min angle", min_angle);
+            max_angle = EditorGUILayout.FloatField("Max angle", max_angle);
+          }else if(angle_mode == 1){
+            EditorGUILayout.LabelField("Angle");
+
+            for(int i = 0; i < template_angles.Length; i++){
+              template_angles[i] = EditorGUILayout.FloatField("Angle " + (i + 1), template_angles[i]);
+            }
+          }else if(angle_mode == 2){
+            single_angle = EditorGUILayout.FloatField("Angle", single_angle);
+          }
+        }
+
+      EditorGUILayout.EndScrollView();
 
       EditorGUILayout.HelpBox("使用パラメーター: " + CountExMemory().ToString(), MessageType.Info);
 
