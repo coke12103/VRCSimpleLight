@@ -491,12 +491,14 @@ public class SimpleLightGUI : EditorWindow
 
   void FixLightsSetting(){
     if(target_light_spot != null){
+      target_light_spot.gameObject.SetActive(false);
       target_light_spot.type = LightType.Spot;
       target_light_spot.lightmapBakeType = LightmapBakeType.Realtime;
       target_light_spot.renderMode = LightRenderMode.ForcePixel;
     }
 
     if(target_light_point != null){
+      target_light_point.gameObject.SetActive(false);
       target_light_point.type = LightType.Point;
       target_light_point.lightmapBakeType = LightmapBakeType.Realtime;
       target_light_point.renderMode = LightRenderMode.ForcePixel;
