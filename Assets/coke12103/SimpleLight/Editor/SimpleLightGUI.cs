@@ -170,6 +170,10 @@ public class SimpleLightGUI : EditorWindow
           Install();
         }
       EditorGUI.EndDisabledGroup();
+
+      if(GUILayout.Button("Uninstall")){
+        Uninstall();
+      }
     EditorGUI.EndDisabledGroup();
   }
 
@@ -235,15 +239,10 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void Install(){
-    Debug.Log("button");
-
     SetupDirs();
     SetupDescriptor();
     // ここから削除処理
-    RemoveOldParams();
-    RemoveOldLeyers();
-    RemoveOldExParam();
-    RemoveOldExMenu();
+    Uninstall();
     // ここまで削除処理
     // ここから追加処理
     CreateAnimatorParams();
@@ -254,6 +253,18 @@ public class SimpleLightGUI : EditorWindow
     CreateExMenu();
     // ここまで追加処理
     SaveAssets();
+
+    message = "Install done!";
+  }
+
+  void Uninstall(){
+    RemoveOldParams();
+    RemoveOldLeyers();
+    RemoveOldExParam();
+    RemoveOldExMenu();
+    SaveAssets();
+
+    message = "Uninstall done!";
   }
 
   void CheckInstallCondition(){
@@ -320,6 +331,15 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void RemoveOldParams(){
+    // 新規作成時には絶対にある、削除時にはない場合がある。
+    if(
+      target_avatar.baseAnimationLayers[fx_index].isDefault
+      || target_avatar.baseAnimationLayers[fx_index].animatorController == null
+    ){
+      Debug.Log("レイヤーがないのでスキップ");
+      return;
+    }
+
     AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
 
     AnimatorControllerParameter[] orig_params = fx_layer.parameters;
@@ -344,6 +364,15 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void RemoveOldLeyers(){
+    // 新規作成時には絶対にある、削除時にはない場合がある。
+    if(
+      target_avatar.baseAnimationLayers[fx_index].isDefault
+      || target_avatar.baseAnimationLayers[fx_index].animatorController == null
+    ){
+      Debug.Log("レイヤーがないのでスキップ");
+      return;
+    }
+
     AnimatorController fx_layer = target_avatar.baseAnimationLayers[fx_index].animatorController as AnimatorController;
 
     AnimatorControllerLayer[] orig_layers = fx_layer.layers;
@@ -368,6 +397,12 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void RemoveOldExParam(){
+    // 新規作成時には絶対にある、削除時にはない場合がある。
+    if(target_avatar.expressionParameters == null){
+      Debug.Log("EX Paramがないのでスキップ");
+      return;
+    }
+
     ExpressionParameters ex_param = target_avatar.expressionParameters;
 
     ExpressionParameter[] orig_ex_params = ex_param.parameters;
@@ -392,6 +427,12 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void RemoveOldExMenu(){
+    // 新規作成時には絶対にある、削除時にはない場合がある。
+    if(target_avatar.expressionsMenu == null){
+      Debug.Log("EX Menuがないのでスキップ");
+      return;
+    }
+
     ExpressionsMenu ex_menu = target_avatar.expressionsMenu;
 
     int i = 0;
@@ -833,9 +874,11 @@ public class SimpleLightGUI : EditorWindow
   }
 
   void SaveAssets(){
-    EditorUtility.SetDirty(target_avatar.baseAnimationLayers[fx_index].animatorController);
-    EditorUtility.SetDirty(target_avatar.expressionsMenu);
-    EditorUtility.SetDirty(target_avatar.expressionParameters);
+    if(target_avatar.baseAnimationLayers[fx_index].animatorController != null) EditorUtility.SetDirty(target_avatar.baseAnimationLayers[fx_index].animatorController);
+    if(target_avatar.expressionsMenu != null) EditorUtility.SetDirty(target_avatar.expressionsMenu);
+    if(target_avatar.expressionParameters != null) EditorUtility.SetDirty(target_avatar.expressionParameters);
+
+    EditorUtility.SetDirty(target_avatar);
 
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
