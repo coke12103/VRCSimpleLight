@@ -218,31 +218,6 @@ public class SimpleLightGUI : EditorWindow
     return result;
   }
 
-  int CountParams(){
-    // bool on/off 1bit
-    int result = 1;
-
-    // bool spot/point 1bit
-    if(light_mode == 2) result += 1;
-
-    // float color(r, g, b) 8bit * 3
-    if(color_mode == 0) result += 3;
-    // int color template 8bit
-    else if(color_mode == 1) result += 1;
-
-    // float intensity 8bit / int intensity 8bit
-    if(intensity_mode == 0 || intensity_mode == 1) result += 1;
-
-    // float range 8bit / int range 8bit
-    if(range_mode == 0 || range_mode == 1) result += 1;
-
-    // spotのみの設定値
-    // float angle 8bit / int angle 8bit
-    if((light_mode == 0 || light_mode == 2) && (angle_mode == 0 || angle_mode == 1)) result += 1;
-
-    return result;
-  }
-
   void Install(){
     SetupDirs();
     SetupDescriptor();
@@ -291,14 +266,16 @@ public class SimpleLightGUI : EditorWindow
     if(!AssetDatabase.IsValidFolder(user_asset_path)) AssetDatabase.CreateFolder(root + "/User", valid_name);
   }
 
+  bool IsFxExist(){
+    AvatarDescriptor.CustomAnimLayer layer = target_avatar.baseAnimationLayers[fx_index];
+    return (layer.isDefault || layer.animatorController == null);
+  }
+
   // FX/EX Menu/EX Paramがないアバターに対応する。
   void SetupDescriptor(){
     // baseAnimationLayers
     // base, additive, gesture, action, fx
-    if(
-      target_avatar.baseAnimationLayers[fx_index].isDefault
-      || target_avatar.baseAnimationLayers[fx_index].animatorController == null
-    ){
+    if(IsFxExist()){
       // FXない処理
       target_avatar.customizeAnimationLayers = true;
 
@@ -337,10 +314,7 @@ public class SimpleLightGUI : EditorWindow
 
   void RemoveOldParams(){
     // 新規作成時には絶対にある、削除時にはない場合がある。
-    if(
-      target_avatar.baseAnimationLayers[fx_index].isDefault
-      || target_avatar.baseAnimationLayers[fx_index].animatorController == null
-    ){
+    if(IsFxExist()){
       Debug.Log("レイヤーがないのでスキップ");
       return;
     }
@@ -370,10 +344,7 @@ public class SimpleLightGUI : EditorWindow
 
   void RemoveOldLeyers(){
     // 新規作成時には絶対にある、削除時にはない場合がある。
-    if(
-      target_avatar.baseAnimationLayers[fx_index].isDefault
-      || target_avatar.baseAnimationLayers[fx_index].animatorController == null
-    ){
+    if(IsFxExist()){
       Debug.Log("レイヤーがないのでスキップ");
       return;
     }
@@ -725,7 +696,6 @@ public class SimpleLightGUI : EditorWindow
       }
     }
 
-    // NOTE: 何故かFXをSetDirtyしなくてもちゃんと反映される
     AssetDatabase.SaveAssets();
     AssetDatabase.Refresh();
   }
