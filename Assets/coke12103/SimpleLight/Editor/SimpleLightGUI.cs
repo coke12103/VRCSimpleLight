@@ -1054,5 +1054,7 @@ public class SimpleLightGUI : EditorWindow
     single_intensity = setting.single_intensity;
     single_range = setting.single_range;
     single_angle = setting.single_angle;
+
+    Debug.Log("Load template: " + setting.name);
   }
 }
