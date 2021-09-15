@@ -1,0 +1,56 @@
+{
+  "light_mode": 2,
+  "color_mode": 0,
+  "intensity_mode": 0,
+  "range_mode": 0,
+  "angle_mode": 0,
+  "min_intensity": 0,
+  "max_intensity": 40,
+  "min_range": 0,
+  "max_range": 24,
+  "min_angle": 0,
+  "max_angle": 179,
+  "template_colors": [
+    "FFFFFF", "FF0000",
+    "FFA200",
+    "00FFFF",
+    "FF00C5",
+    "00FF07",
+    "0051FF",
+    "E8FF00"
+  ],
+  "template_intensities": [
+    0.5,
+    1,
+    2,
+    12,
+    20,
+    40,
+    100,
+    1000
+  ],
+  "template_ranges": [
+    0.1,
+    0.2,
+    0.5,
+    1,
+    2,
+    4,
+    12,
+    24
+  ],
+  "template_angles": [
+    10,
+    20,
+    40,
+    70,
+    90,
+    100,
+    120,
+    179
+  ],
+  "single_color": "FFFFFF",
+  "single_intensity": 1,
+  "single_range": 2,
+  "single_angle": 90
+}

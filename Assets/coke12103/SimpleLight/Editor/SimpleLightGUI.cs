@@ -11,6 +11,8 @@ using ExpressionParameters = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionPar
 using ExpressionParameter = VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.Parameter;
 using RuntimeAnimatorController = UnityEngine.RuntimeAnimatorController;
 
+using coke12103.SimpleLight;
+
 public class SimpleLightGUI : EditorWindow
 {
   // 設定用情報
@@ -44,7 +46,6 @@ public class SimpleLightGUI : EditorWindow
   // その他
   private string user_asset_path;
 
-  // TODO: デフォルト値を作る
   // color
   private Color[] template_colors = {Color.white, Color.white, Color.white, Color.white, Color.white, Color.white, Color.white, Color.white};
   private Color single_color = Color.white;
@@ -63,10 +64,14 @@ public class SimpleLightGUI : EditorWindow
   // その他
   private string message;
   private Vector2 scroll_pos;
+  private DataLoader loader;
 
   [MenuItem("SimpleLight/Editor")]
   private static void Create(){
     SimpleLightGUI win = GetWindow<SimpleLightGUI>("SimpleLight");
+    win.InitTemplate();
+    // 0番目のテンプレートをとりあえず読む(でもこれ無いと例外では)
+    win.LoadTemplate(0);
   }
 
   private void OnGUI(){
@@ -1017,5 +1022,37 @@ public class SimpleLightGUI : EditorWindow
     ExpressionsMenu menu = AssetDatabase.LoadAssetAtPath(menu_path, typeof(ExpressionsMenu)) as ExpressionsMenu;
 
     return menu;
+  }
+
+  void InitTemplate(){
+    loader = new DataLoader();
+  }
+
+  void LoadTemplate(int index){
+    LightSetting setting = loader.datas[index];
+
+    light_mode = setting.light_mode;
+    color_mode = setting.color_mode;
+    intensity_mode = setting.intensity_mode;
+    range_mode = setting.range_mode;
+    angle_mode = setting.angle_mode;
+
+    // TODO: templateの長さを動的指定
+    for(int i = 0; i < template_colors.Length; i++) template_colors[i] = setting.template_colors[i];
+    for(int i = 0; i < template_intensities.Length; i++) template_intensities[i] = setting.template_intensities[i];
+    for(int i = 0; i < template_ranges.Length; i++) template_ranges[i] = setting.template_ranges[i];
+    for(int i = 0; i < template_angles.Length; i++) template_angles[i] = setting.template_angles[i];
+
+    min_intensity = setting.min_intensity;
+    max_intensity = setting.max_intensity;
+    min_range = setting.min_range;
+    max_range = setting.max_range;
+    min_angle = setting.min_angle;
+    max_angle = setting.max_angle;
+
+    single_color = setting.single_color;
+    single_intensity = setting.single_intensity;
+    single_range = setting.single_range;
+    single_angle = setting.single_angle;
   }
 }
