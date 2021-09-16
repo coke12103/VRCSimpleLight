@@ -181,7 +181,12 @@ public class SimpleLightGUI : EditorWindow
         Uninstall();
       }
       EditorGUILayout.Space();
-      template_index = EditorGUILayout.Popup("Template", template_index, TemplateNames());
+
+      EditorGUI.BeginChangeCheck();
+        template_index = EditorGUILayout.Popup("Template", template_index, TemplateNames());
+      if(EditorGUI.EndChangeCheck()){
+        LoadTemplate(template_index);
+      }
     EditorGUI.EndDisabledGroup();
   }
 
