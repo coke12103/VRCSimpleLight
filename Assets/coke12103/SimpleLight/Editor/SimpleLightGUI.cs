@@ -1037,6 +1037,7 @@ public class SimpleLightGUI : EditorWindow
   }
 
   string[] TemplateNames(){
+    if(loader == null) return new string[]{"Please reopen window"};
     List<LightSetting> templates = loader.datas;
     string[] result = new string[templates.Count];
 
