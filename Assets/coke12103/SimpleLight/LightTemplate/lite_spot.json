@@ -1,0 +1,58 @@
+{
+  "name": "Lite(Spot)",
+  "light_mode": 0,
+  "color_mode": 2,
+  "intensity_mode": 2,
+  "range_mode": 2,
+  "angle_mode": 2,
+  "min_intensity": 0,
+  "max_intensity": 20,
+  "min_range": 0,
+  "max_range": 24,
+  "min_angle": 0,
+  "max_angle": 179,
+  "template_colors": [
+    "FFFFFF", 
+    "FF0000",
+    "FFA200",
+    "00FFFF",
+    "FF00C5",
+    "00FF07",
+    "0051FF",
+    "E8FF00"
+  ],
+  "template_intensities": [
+    0.2,
+    0.5,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "template_ranges": [
+    1,
+    2,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24
+  ],
+  "template_angles": [
+    10,
+    20,
+    40,
+    70,
+    90,
+    100,
+    120,
+    179
+  ],
+  "single_color": "FFFFFF",
+  "single_intensity": 1,
+  "single_range": 8,
+  "single_angle": 90
+}
