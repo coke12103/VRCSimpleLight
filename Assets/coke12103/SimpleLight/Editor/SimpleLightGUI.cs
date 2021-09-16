@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 using UnityEditor.Animations;
 
 using AvatarDescriptor = VRC.SDK3.Avatars.Components.VRCAvatarDescriptor;
@@ -65,6 +66,7 @@ public class SimpleLightGUI : EditorWindow
   private string message;
   private Vector2 scroll_pos;
   private DataLoader loader;
+  private int template_index = 0;
 
   [MenuItem("SimpleLight/Editor")]
   private static void Create(){
@@ -75,8 +77,7 @@ public class SimpleLightGUI : EditorWindow
   }
 
   private void OnGUI(){
-    // これいる？
-    EditorGUILayout.LabelField("SimpleLightのインストール");
+    EditorGUILayout.LabelField("SimpleLight");
 
     target_avatar = EditorGUILayout.ObjectField("Avatar", target_avatar, typeof(AvatarDescriptor), true) as AvatarDescriptor;
 
@@ -179,6 +180,8 @@ public class SimpleLightGUI : EditorWindow
       if(GUILayout.Button("Uninstall")){
         Uninstall();
       }
+      EditorGUILayout.Space();
+      template_index = EditorGUILayout.Popup("Template", template_index, TemplateNames());
     EditorGUI.EndDisabledGroup();
   }
 
@@ -1026,5 +1029,16 @@ public class SimpleLightGUI : EditorWindow
     single_angle = setting.single_angle;
 
     Debug.Log("Load template: " + setting.name);
+  }
+
+  string[] TemplateNames(){
+    List<LightSetting> templates = loader.datas;
+    string[] result = new string[templates.Count];
+
+    for(int i = 0; i < templates.Count; i++){
+      result[i] = templates[i].name;
+    }
+
+    return result;
   }
 }
