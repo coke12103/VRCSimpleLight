@@ -338,7 +338,7 @@ public class SimpleLightGUI : EditorWindow
       AnimatorControllerParameter param = orig_params[i];
 
       if(!param.name.StartsWith(prefix)){
-        removed_params[i] = param;
+        removed_params[count] = param;
         count++;
       }else{
         Debug.Log("Removed: " + param.name);
@@ -368,7 +368,7 @@ public class SimpleLightGUI : EditorWindow
       AnimatorControllerLayer layer = orig_layers[i];
 
       if(!layer.name.StartsWith(prefix)){
-        removed_layers[i] = layer;
+        removed_layers[count] = layer;
         count++;
       }else{
         Debug.Log("Removed: " + layer.name);
@@ -398,7 +398,7 @@ public class SimpleLightGUI : EditorWindow
       ExpressionParameter param = orig_ex_params[i];
 
       if(!param.name.StartsWith(prefix) && !(param.name == "")){
-        removed_ex_params[i] = param;
+        removed_ex_params[count] = param;
         count++;
       }else{
         Debug.Log("Removed: " + param.name);
